@@ -1,0 +1,428 @@
+---
+title: Local Storage Service
+description: Browser localStorage management for conversations and settings persistence
+---
+
+The Local Storage service provides functions for persisting and retrieving chat messages, conversation history, and application settings using the browser's localStorage API.
+
+## Core Functions
+
+### saveMessages
+
+Saves the current conversation messages to localStorage.
+
+```typescript
+saveMessages(messages: Message[]): void
+```
+
+<ParamField path="messages" type="Message[]" required>
+  Array of messages to persist
+</ParamField>
+
+**Example:**
+
+```typescript
+import { saveMessages } from './services/localStorage';
+
+const currentMessages = [
+  {
+    id: '1',
+    role: 'user',
+    content: 'Hello',
+    timestamp: new Date()
+  },
+  {
+    id: '2',
+    role: 'assistant',
+    content: 'Hi! How can I help?',
+    timestamp: new Date()
+  }
+];
+
+saveMessages(currentMessages);
+```
+
+**Storage Key:** `polychat-messages`
+
+**Error Handling:** Silently handles storage quota exceeded or disabled errors
+
+---
+
+### loadMessages
+
+Loads previously saved messages from localStorage.
+
+```typescript
+loadMessages(): Message[]
+```
+
+<ResponseField name="messages" type="Message[]">
+  Array of saved messages, or empty array if none exist or data is corrupted
+</ResponseField>
+
+**Example:**
+
+```typescript
+import { loadMessages } from './services/localStorage';
+
+const messages = loadMessages();
+
+if (messages.length > 0) {
+  console.log('Restored conversation with', messages.length, 'messages');
+} else {
+  console.log('Starting fresh conversation');
+}
+```
+
+**Features:**
+- Validates data structure (must be an array)
+- Automatically cleans corrupted data
+- Returns empty array on parse errors
+- Safe to call on first app load
+
+---
+
+### saveChatHistory
+
+Saves multiple conversation sessions to localStorage.
+
+```typescript
+saveChatHistory(sessions: ChatSession[]): void
+```
+
+<ParamField path="sessions" type="ChatSession[]" required>
+  Array of chat sessions to persist
+</ParamField>
+
+**Example:**
+
+```typescript
+import { saveChatHistory } from './services/localStorage';
+
+const sessions = [
+  {
+    id: 'session-1',
+    title: 'TypeScript Help',
+    messages: [
+      { id: '1', role: 'user', content: 'Explain types', timestamp: new Date() },
+      { id: '2', role: 'assistant', content: 'Types in TS...', timestamp: new Date() }
+    ],
+    createdAt: new Date(),
+    updatedAt: new Date()
+  },
+  {
+    id: 'session-2',
+    title: 'React Hooks',
+    messages: [...],
+    createdAt: new Date(),
+    updatedAt: new Date()
+  }
+];
+
+saveChatHistory(sessions);
+```
+
+**Storage Key:** `polychat_history`
+
+**Automatic Filtering:** Empty conversations (sessions with no non-empty messages) are automatically excluded to prevent data pollution.
+
+---
+
+### loadChatHistory
+
+Loads all saved conversation sessions from localStorage.
+
+```typescript
+loadChatHistory(): ChatSession[]
+```
+
+<ResponseField name="sessions" type="ChatSession[]">
+  Array of chat sessions with properly parsed timestamps
+</ResponseField>
+
+**Example:**
+
+```typescript
+import { loadChatHistory } from './services/localStorage';
+
+const history = loadChatHistory();
+
+console.log(`Found ${history.length} previous conversations`);
+
+history.forEach(session => {
+  console.log(`${session.title}: ${session.messages.length} messages`);
+});
+```
+
+**Features:**
+- Converts timestamp strings back to Date objects
+- Validates data structure
+- Auto-cleans corrupted data
+- Returns empty array on errors
+
+---
+
+## Type Definitions
+
+### Message
+
+```typescript
+interface Message {
+  id: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string | MessageContent[];
+  timestamp: Date;
+}
+```
+
+### MessageContent
+
+```typescript
+type MessageContent = 
+  | { type: 'text'; text: string }
+  | { type: 'image_url'; image_url: { url: string } };
+```
+
+### ChatSession
+
+```typescript
+interface ChatSession {
+  id: string;
+  title: string;
+  messages: Message[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+---
+
+## Internal Utilities
+
+### getMessageText (Internal)
+
+Extracts text content from message content (string or MessageContent array).
+
+```typescript
+const getMessageText = (content: string | MessageContent[]): string
+```
+
+Used internally to:
+- Validate message content
+- Filter empty messages
+- Check if sessions have meaningful content
+
+**Example behavior:**
+
+```typescript
+// String content
+getMessageText('Hello world');
+// Returns: 'Hello world'
+
+// MessageContent array
+getMessageText([
+  { type: 'text', text: 'Check this image:' },
+  { type: 'image_url', image_url: { url: 'https://...' } },
+  { type: 'text', text: 'Pretty cool!' }
+]);
+// Returns: 'Check this image: Pretty cool!'
+```
+
+---
+
+## Usage Patterns
+
+### Auto-Save on Message Update
+
+```typescript
+import { saveMessages } from './services/localStorage';
+
+const [messages, setMessages] = useState<Message[]>(() => loadMessages());
+
+// Save whenever messages change
+useEffect(() => {
+  saveMessages(messages);
+}, [messages]);
+
+const addMessage = (newMessage: Message) => {
+  setMessages(prev => [...prev, newMessage]);
+  // Auto-saved by useEffect
+};
+```
+
+### Session Management
+
+```typescript
+import { saveChatHistory, loadChatHistory } from './services/localStorage';
+
+const [sessions, setSessions] = useState<ChatSession[]>(() => loadChatHistory());
+
+const createNewSession = () => {
+  const newSession: ChatSession = {
+    id: `session-${Date.now()}`,
+    title: 'New Chat',
+    messages: [],
+    createdAt: new Date(),
+    updatedAt: new Date()
+  };
+  
+  const updated = [...sessions, newSession];
+  setSessions(updated);
+  saveChatHistory(updated);
+};
+
+const updateSession = (sessionId: string, messages: Message[]) => {
+  const updated = sessions.map(session => 
+    session.id === sessionId
+      ? { ...session, messages, updatedAt: new Date() }
+      : session
+  );
+  
+  setSessions(updated);
+  saveChatHistory(updated);
+};
+```
+
+### Data Migration
+
+```typescript
+// Migrate from old storage format
+const migrateOldData = () => {
+  const oldData = localStorage.getItem('old-chat-key');
+  
+  if (oldData) {
+    try {
+      const parsed = JSON.parse(oldData);
+      saveMessages(parsed);
+      localStorage.removeItem('old-chat-key');
+      console.log('Migration successful');
+    } catch (error) {
+      console.error('Migration failed:', error);
+    }
+  }
+};
+```
+
+### Export/Import Conversations
+
+```typescript
+// Export to JSON file
+const exportConversations = () => {
+  const history = loadChatHistory();
+  const json = JSON.stringify(history, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `polychat-backup-${Date.now()}.json`;
+  a.click();
+};
+
+// Import from JSON file
+const importConversations = async (file: File) => {
+  const text = await file.text();
+  const sessions = JSON.parse(text);
+  
+  // Validate and convert timestamps
+  const validated = sessions.map((s: ChatSession) => ({
+    ...s,
+    createdAt: new Date(s.createdAt),
+    updatedAt: new Date(s.updatedAt),
+    messages: s.messages.map((m: Message) => ({
+      ...m,
+      timestamp: new Date(m.timestamp)
+    }))
+  }));
+  
+  saveChatHistory(validated);
+};
+```
+
+---
+
+## Storage Limits
+
+### Browser Quotas
+
+Most browsers provide 5-10MB of localStorage per origin:
+
+- **Chrome/Edge**: ~10MB
+- **Firefox**: ~10MB  
+- **Safari**: ~5MB
+
+### Handling Quota Exceeded
+
+```typescript
+const saveWithQuotaCheck = (messages: Message[]) => {
+  try {
+    saveMessages(messages);
+  } catch (error) {
+    if (error.name === 'QuotaExceededError') {
+      // Handle quota exceeded
+      console.warn('Storage quota exceeded, removing old sessions');
+      
+      const history = loadChatHistory();
+      // Keep only last 10 sessions
+      const trimmed = history
+        .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
+        .slice(0, 10);
+      
+      saveChatHistory(trimmed);
+      saveMessages(messages);
+    }
+  }
+};
+```
+
+### Monitoring Storage Usage
+
+```typescript
+const getStorageSize = () => {
+  let total = 0;
+  
+  for (const key in localStorage) {
+    if (localStorage.hasOwnProperty(key)) {
+      total += localStorage[key].length + key.length;
+    }
+  }
+  
+  return {
+    bytes: total,
+    kb: (total / 1024).toFixed(2),
+    mb: (total / 1024 / 1024).toFixed(2)
+  };
+};
+
+console.log('Storage usage:', getStorageSize());
+```
+
+---
+
+## Best Practices
+
+1. **Auto-save frequently**: Save after each message to prevent data loss
+2. **Validate on load**: Always validate loaded data structure
+3. **Handle errors gracefully**: Return sensible defaults on errors
+4. **Filter empty sessions**: Remove sessions with no content before saving
+5. **Implement cleanup**: Periodically remove old or unused sessions
+6. **Consider compression**: For large datasets, consider compressing JSON
+7. **Provide export**: Allow users to export their data
+
+```typescript
+// Good: Regular cleanup
+const cleanupOldSessions = () => {
+  const history = loadChatHistory();
+  const oneMonthAgo = new Date();
+  oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+  
+  const active = history.filter(session => 
+    session.updatedAt > oneMonthAgo
+  );
+  
+  saveChatHistory(active);
+};
+
+// Run cleanup on app start
+cleanupOldSessions();
+```

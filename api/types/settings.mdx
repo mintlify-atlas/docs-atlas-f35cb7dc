@@ -1,0 +1,123 @@
+---
+title: 'Settings'
+description: 'Settings interface for user preferences and configuration'
+---
+
+## Settings
+
+User preferences and application configuration.
+
+<ResponseField name="apiKey" type="string" required>
+  API key for accessing AI services
+</ResponseField>
+
+<ResponseField name="selectedModel" type="string" required>
+  ID of the currently selected AI model
+</ResponseField>
+
+<ResponseField name="theme" type="'light' | 'dark'" required>
+  UI theme preference:
+  - `light`: Light theme
+  - `dark`: Dark theme
+</ResponseField>
+
+<ResponseField name="accent" type="'violet' | 'blue' | 'green' | 'rose' | 'orange' | 'teal' | 'red' | 'cyan'">
+  Accent color for the UI. Available options:
+  - `violet`
+  - `blue`
+  - `green`
+  - `rose`
+  - `orange`
+  - `teal`
+  - `red`
+  - `cyan`
+</ResponseField>
+
+<ResponseField name="systemPrompt" type="string" required>
+  Default system instruction that sets the AI's behavior and context
+</ResponseField>
+
+<ResponseField name="tone" type="'neutre' | 'formel' | 'amical' | 'professionnel' | 'enthousiaste'">
+  Preferred tone for AI responses:
+  - `neutre`: Neutral tone
+  - `formel`: Formal tone
+  - `amical`: Friendly tone
+  - `professionnel`: Professional tone
+  - `enthousiaste`: Enthusiastic tone
+</ResponseField>
+
+<ResponseField name="notificationsEnabled" type="boolean">
+  Whether notifications are enabled
+</ResponseField>
+
+<ResponseField name="ragEnabled" type="boolean">
+  Whether Retrieval-Augmented Generation (RAG) is enabled for enhanced context
+</ResponseField>
+
+<ResponseField name="hasOnboarded" type="boolean">
+  Whether the user has completed the onboarding flow
+</ResponseField>
+
+### Example
+
+```typescript
+const settings: Settings = {
+  apiKey: 'sk-...',
+  selectedModel: 'gpt-4-turbo',
+  theme: 'dark',
+  accent: 'violet',
+  systemPrompt: 'You are a helpful AI assistant.',
+  tone: 'professionnel',
+  notificationsEnabled: true,
+  ragEnabled: false,
+  hasOnboarded: true
+};
+```
+
+### Usage
+
+Settings are typically stored in local storage and loaded on app initialization:
+
+```typescript
+// Load settings
+const loadSettings = (): Settings => {
+  const stored = localStorage.getItem('polychat-settings');
+  if (stored) {
+    return JSON.parse(stored);
+  }
+  
+  // Default settings
+  return {
+    apiKey: '',
+    selectedModel: 'gpt-4',
+    theme: 'dark',
+    accent: 'violet',
+    systemPrompt: 'You are a helpful AI assistant.',
+    tone: 'neutre',
+    notificationsEnabled: true,
+    ragEnabled: false,
+    hasOnboarded: false
+  };
+};
+
+// Save settings
+const saveSettings = (settings: Settings) => {
+  localStorage.setItem('polychat-settings', JSON.stringify(settings));
+};
+```
+
+### System Prompt
+
+The `systemPrompt` field is particularly important as it defines the AI's behavior:
+
+```typescript
+// Example system prompts for different use cases
+const codingAssistant: string = 
+  'You are an expert programming assistant. Provide clear, well-documented code with explanations.';
+
+const creativeWriter: string = 
+  'You are a creative writing assistant. Help users craft engaging stories and content.';
+
+const dataAnalyst: string = 
+  'You are a data analysis expert. Help users understand and interpret data with clear insights.';
+```

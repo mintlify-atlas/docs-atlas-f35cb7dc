@@ -1,0 +1,237 @@
+---
+title: 'Chat Interface'
+description: 'Multi-window chat interface with message history and regeneration capabilities'
+icon: 'message-square'
+---
+
+## Overview
+
+PolyChat-AI features a modern, intuitive chat interface designed for seamless interaction with AI language models. The interface supports multiple simultaneous conversations, message history management, and advanced features like response regeneration.
+
+## Key Features
+
+### Multi-Window Support
+
+Handle multiple conversations simultaneously without losing context:
+
+- **Independent Chat Windows**: Each conversation maintains its own context and settings
+- **Quick Switching**: Navigate between conversations with keyboard shortcuts (`Ctrl/Cmd + N`)
+- **Session Persistence**: All conversations are saved locally and persist across sessions
+- **Model Per Conversation**: Each chat can use a different AI model
+
+<Tip>
+Use `Ctrl/Cmd + N` to quickly start a new conversation while keeping your existing chats active.
+</Tip>
+
+### Message History Management
+
+**Intelligent History**
+- Save and manage conversations with automatic timestamp tracking
+- Search functionality to find specific conversations or messages
+- Export conversations for documentation or backup
+- Delete or archive old conversations to maintain organization
+
+**Local Storage**
+```typescript
+// All conversations are stored locally in your browser
+// Location: localStorage under 'PolyChat-AI' namespace
+// Format: JSON with message content, timestamps, and metadata
+```
+
+### Message Controls
+
+**Inline Model Information**
+
+Every assistant response displays which model generated it:
+- Model name and version
+- Response generation time
+- Character count for tracking usage
+
+**Response Regeneration**
+
+Not satisfied with a response? Regenerate it with one click:
+- Uses the same model and system prompt
+- Maintains conversation context
+- Previous response is replaced (not deleted)
+- No additional setup required
+
+<CodeGroup>
+```typescript Chat Message Structure
+interface Message {
+  id: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string | MessageContent[];
+  timestamp: Date;
+  model?: string; // Which model generated this response
+}
+```
+
+```typescript Message Content Types
+type MessageContent = 
+  | { type: 'text'; text: string }
+  | { type: 'image_url'; image_url: { url: string } };
+```
+</CodeGroup>
+
+## Real-time Features
+
+### Streaming Responses
+
+Experience fluid AI responses with real-time streaming:
+
+```typescript
+// From: src/services/openRouter.ts
+export async function streamAIResponse(
+  messages: Message[],
+  apiKey: string,
+  model: string,
+  onChunk: (delta: string) => void,
+  systemPrompt?: string,
+  abortController?: AbortController
+): Promise<string | MessageContent[]>
+```
+
+**Benefits**:
+- See responses as they're generated (character by character)
+- Cancel mid-response if needed with abort controller
+- Live character count and loading animations
+- Automatic fallback to non-streaming if connection fails
+
+### Loading States
+
+**Visual Feedback**
+- Typing indicators while AI is generating
+- Loading animations during model processing
+- Character count updates in real-time
+- Progress indication for long responses
+
+## Interface Customization
+
+### Themes
+
+Choose from 4 distinct visual themes:
+
+| Theme | Description |
+|-------|-------------|
+| **Dark Mode** | Elegant interface with dark background |
+| **Light Mode** | Clean, modern light interface |
+| **Pixel Art** | Retro style with custom animations |
+| **Hacker** | Terminal-style with custom cursor |
+
+### Accent Colors
+
+Personalize with 8 accent color options:
+- Violet, Blue, Green, Rose
+- Orange, Teal, Red, Cyan
+
+<Note>
+Theme and color preferences are saved locally and persist across sessions.
+</Note>
+
+## Keyboard Shortcuts
+
+Boost your productivity with these shortcuts:
+
+| Shortcut | Action |
+|----------|--------|
+| `Ctrl/Cmd + N` | New conversation |
+| `Ctrl/Cmd + S` | Save conversation |
+| `Ctrl/Cmd + K` | Open settings |
+| `Ctrl/Cmd + U` | Usage dashboard |
+| `Ctrl/Cmd + /` | Show help |
+
+## Advanced Features
+
+### System Instructions
+
+Customize AI behavior with custom system prompts:
+
+```text
+Settings → Advanced → System Instructions
+```
+
+**Configuration Options**:
+- Global system prompt applied to all conversations
+- Per-conversation system prompts via templates
+- Conversation tone: Neutral, Formal, Friendly, Professional, Enthusiastic
+
+### Dynamic Model Switching
+
+Change models mid-conversation seamlessly:
+- No context loss when switching models
+- Previous messages remain intact
+- New responses use the selected model
+- Model information displayed per message
+
+<Warning>
+Switching models mid-conversation works seamlessly, but different models may interpret previous context differently.
+</Warning>
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Organizing Conversations">
+    - Use descriptive names when saving conversations
+    - Archive completed conversations to reduce clutter
+    - Export important conversations for backup
+    - Regularly review and delete test conversations
+  </Accordion>
+
+  <Accordion title="Optimizing Performance">
+    - Clear old conversations periodically (local storage has limits)
+    - Use streaming for long responses
+    - Enable RAG only when needed for better performance
+    - Close unused conversation tabs
+  </Accordion>
+
+  <Accordion title="Managing Context">
+    - Keep conversations focused on a single topic
+    - Start new conversations for different subjects
+    - Use templates for consistent conversation structures
+    - Regenerate responses if context seems lost
+  </Accordion>
+</AccordionGroup>
+
+## Technical Details
+
+### Message Persistence
+
+Messages are stored using browser localStorage:
+
+```typescript
+// Location: src/services/localStorage.ts
+// Storage structure:
+{
+  conversations: [
+    {
+      id: string,
+      title: string,
+      messages: Message[],
+      model: string,
+      createdAt: Date,
+      updatedAt: Date
+    }
+  ]
+}
+```
+
+### API Integration
+
+All messages are sent to OpenRouter API:
+
+```typescript
+// From: src/services/openRouter.ts
+const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
+
+// Headers include:
+{
+  'Authorization': `Bearer ${apiKey}`,
+  'Content-Type': 'application/json',
+  'HTTP-Referer': window.location.origin,
+  'X-Title': 'PolyChat AI'
+}
+```
+
+<Card title="Next: Multi-Model Chat" icon="grid-2x2" href="/features/multi-model-chat">
+  Learn how to run up to 3 models simultaneously for comparison
+</Card>

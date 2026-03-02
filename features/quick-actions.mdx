@@ -1,0 +1,568 @@
+---
+title: 'Quick Actions'
+description: '10+ instant text and code transformations with one click'
+icon: 'zap'
+---
+
+## Overview
+
+Quick Actions provide instant transformations for selected text or code. With a single click, apply expert-level operations like code explanation, optimization, translation, summarization, and more.
+
+## Available Actions
+
+<CardGroup cols={2}>
+  <Card title="Explain Code" icon="lightbulb">
+    Get detailed explanations with examples and step-by-step breakdowns
+  </Card>
+  
+  <Card title="Optimize" icon="bolt">
+    Performance and efficiency improvements with benchmarking
+  </Card>
+  
+  <Card title="Debug" icon="bug">
+    Systematic bug analysis with solutions and fixes
+  </Card>
+  
+  <Card title="Add Comments" icon="file-code">
+    Comprehensive documentation and inline comments
+  </Card>
+  
+  <Card title="Translate" icon="globe">
+    Multi-language translation with cultural context
+  </Card>
+  
+  <Card title="Summarize" icon="list">
+    Concise summaries with key points extraction
+  </Card>
+  
+  <Card title="Review" icon="check-circle">
+    Expert review with constructive feedback
+  </Card>
+  
+  <Card title="Improve" icon="sparkles">
+    Quality improvements for clarity and impact
+  </Card>
+  
+  <Card title="Simplify" icon="minimize-2">
+    Make complex text accessible to all audiences
+  </Card>
+  
+  <Card title="Expand" icon="maximize-2">
+    Elaborate and add depth to ideas
+  </Card>
+</CardGroup>
+
+## Code Actions
+
+### 1. Explain Code 💡
+
+**What it does**: Provides clear, educational explanations of code
+
+```typescript
+// From: src/data/templates.ts - Quick Actions
+
+SystemPrompt: `
+  Programming educator with expertise in multiple languages.
+  Explain code covering:
+  
+  1. What it does (function/purpose)
+  2. How it works (step-by-step breakdown)
+  3. Why it's written this way (design decisions)
+  4. Key concepts (patterns, algorithms, features)
+  5. Potential improvements or alternatives
+  
+  Use analogies and provide practical examples.
+`
+```
+
+**Example Usage**:
+
+<CodeGroup>
+```javascript Before
+// Select this code and click "Explain Code"
+const fibonacci = (n) => {
+  if (n <= 1) return n;
+  return fibonacci(n - 1) + fibonacci(n - 2);
+};
+```
+
+```markdown After
+# Fibonacci Function Explanation
+
+## What it does
+Calculates the nth Fibonacci number using recursion.
+
+## How it works
+1. Base case: If n ≤ 1, return n directly
+2. Recursive case: Sum of previous two Fibonacci numbers
+3. Example: fib(5) = fib(4) + fib(3) = 5
+
+## Why this approach
+- Clean, mathematical representation
+- Easy to understand recursion concept
+- Mirrors mathematical definition
+
+## Key concepts
+- **Recursion**: Function calling itself
+- **Base case**: Prevents infinite recursion
+- **Time complexity**: O(2^n) - exponential!
+
+## Improvements
+This is inefficient for large n. Consider:
+- Memoization: O(n) time
+- Dynamic programming: O(n) time, O(n) space
+- Iterative approach: O(n) time, O(1) space
+```
+</CodeGroup>
+
+**Recommended Models**: GPT-4, Claude-3, CodeLlama
+
+### 2. Optimize Code ⚡
+
+**What it does**: Analyzes and improves code performance
+
+**Analysis Areas**:
+- **Time complexity**: Algorithmic efficiency (Big O)
+- **Space complexity**: Memory usage optimization
+- **Readability**: Code clarity and maintainability
+- **Best practices**: Modern conventions and patterns
+- **Language-specific**: Idioms and optimizations
+
+**Example Output**:
+
+```typescript
+// Original code performance issues identified:
+// 1. O(n²) nested loops - use hash map instead
+// 2. Repeated array allocations - use single buffer
+// 3. Missing index optimization - add early exit
+
+// Optimized version provided with:
+// - O(n) time complexity (was O(n²))
+// - 50% memory reduction
+// - Early exit conditions
+// - Benchmark: 10x faster on 1000+ items
+```
+
+### 3. Debug Code 🐛
+
+**What it does**: Systematic bug detection and resolution
+
+**Checks For**:
+1. Syntax and compilation errors
+2. Logical errors and incorrect assumptions
+3. Runtime exceptions and edge cases
+4. Performance bottlenecks
+5. Security vulnerabilities
+
+**For Each Issue**:
+- Clear problem description
+- Why it occurs (root cause)
+- Specific solution with code
+- Prevention recommendations
+
+### 4. Add Comments 📝
+
+**What it does**: Generates comprehensive code documentation
+
+**Documentation Types**:
+
+<Tabs>
+  <Tab title="JavaScript/TypeScript">
+    ```typescript
+    /**
+     * Calculates the total price including tax
+     * @param {number} price - Base price before tax
+     * @param {number} taxRate - Tax rate as decimal (e.g., 0.08 for 8%)
+     * @returns {number} Total price with tax applied
+     * @throws {Error} If price is negative or taxRate is invalid
+     * @example
+     * calculateTotal(100, 0.08) // Returns 108
+     */
+    function calculateTotal(price: number, taxRate: number): number {
+      // Validate inputs to prevent calculation errors
+      if (price < 0) throw new Error('Price cannot be negative');
+      if (taxRate < 0 || taxRate > 1) throw new Error('Invalid tax rate');
+      
+      // Calculate tax amount and add to base price
+      const tax = price * taxRate;
+      return price + tax;
+    }
+    ```
+  </Tab>
+  
+  <Tab title="Python">
+    ```python
+    def calculate_total(price: float, tax_rate: float) -> float:
+        """
+        Calculate the total price including tax.
+        
+        Args:
+            price (float): Base price before tax
+            tax_rate (float): Tax rate as decimal (e.g., 0.08 for 8%)
+            
+        Returns:
+            float: Total price with tax applied
+            
+        Raises:
+            ValueError: If price is negative or tax_rate is invalid
+            
+        Examples:
+            >>> calculate_total(100, 0.08)
+            108.0
+            >>> calculate_total(50.00, 0.10)
+            55.0
+        """
+        # Validate inputs to prevent calculation errors
+        if price < 0:
+            raise ValueError("Price cannot be negative")
+        if not 0 <= tax_rate <= 1:
+            raise ValueError("Tax rate must be between 0 and 1")
+        
+        # Calculate tax amount and add to base price  
+        tax = price * tax_rate
+        return price + tax
+    ```
+  </Tab>
+  
+  <Tab title="Java">
+    ```java
+    /**
+     * Calculates the total price including tax.
+     * 
+     * <p>This method applies the specified tax rate to the base price
+     * and returns the total amount. Input validation ensures that
+     * the price is non-negative and the tax rate is within valid bounds.</p>
+     * 
+     * @param price The base price before tax (must be non-negative)
+     * @param taxRate The tax rate as a decimal between 0 and 1
+     * @return The total price with tax applied
+     * @throws IllegalArgumentException if price is negative or taxRate is invalid
+     * 
+     * @example
+     * <pre>
+     * double total = calculateTotal(100.0, 0.08);
+     * // total = 108.0
+     * </pre>
+     */
+    public double calculateTotal(double price, double taxRate) {
+        // Validate inputs to prevent calculation errors
+        if (price < 0) {
+            throw new IllegalArgumentException("Price cannot be negative");
+        }
+        if (taxRate < 0 || taxRate > 1) {
+            throw new IllegalArgumentException("Invalid tax rate");
+        }
+        
+        // Calculate tax amount and add to base price
+        double tax = price * taxRate;
+        return price + tax;
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Text Actions
+
+### 5. Translate 🌐
+
+**What it does**: Professional translation with cultural context
+
+**Features**:
+- Preserves original meaning and intent
+- Adapts idioms and cultural references
+- Maintains appropriate tone and formality
+- Handles technical terminology correctly
+- Considers regional variations
+
+**Usage Example**:
+
+```text
+Original (English):
+"Let's touch base next week to circle back on this."
+
+Translation (French - Professional):
+"Reprenons contact la semaine prochaine pour faire le point."
+
+Note: Avoided literal translation of "touch base" and "circle back"
+which don't translate well. Used professional equivalents.
+```
+
+### 6. Summarize 📋
+
+**What it does**: Creates concise summaries with key points
+
+**Output Structure**:
+```markdown
+## Key Points
+- Main idea 1 (most important)
+- Main idea 2 
+- Main idea 3
+
+## Supporting Details
+- Critical detail 1
+- Critical detail 2
+
+## Conclusions
+- Primary conclusion
+- Action items (if applicable)
+```
+
+**Adapts Length Based On**:
+- Original content length
+- Complexity of topics
+- Purpose (quick overview vs detailed brief)
+
+### 7. Review ✅
+
+**What it does**: Expert content review with constructive feedback
+
+**Evaluation Criteria**:
+1. **Effectiveness**: Does it achieve its purpose?
+2. **Structure**: Logical flow and organization
+3. **Clarity**: Easy to understand and follow
+4. **Accuracy**: Factual correctness and completeness
+5. **Impact**: Engagement and persuasiveness
+
+**Feedback Format**:
+- ✅ **Strengths**: What works well
+- ⚠️ **Issues**: Specific problems identified
+- 💡 **Suggestions**: Actionable improvements
+- 📊 **Overall**: Summary assessment and rating
+
+### 8. Improve Writing ✍️
+
+**What it does**: Enhances clarity, style, and impact
+
+**Improvements Include**:
+
+<AccordionGroup>
+  <Accordion title="Clarity">
+    - Remove ambiguous phrasing
+    - Simplify complex sentences
+    - Eliminate redundancy
+    - Strengthen topic sentences
+  </Accordion>
+  
+  <Accordion title="Style">
+    - Consistent voice and tone
+    - Better word choice
+    - Varied sentence structure
+    - Active voice preference
+  </Accordion>
+  
+  <Accordion title="Grammar">
+    - Fix grammatical errors
+    - Correct punctuation
+    - Proper tense consistency
+    - Subject-verb agreement
+  </Accordion>
+  
+  <Accordion title="Impact">
+    - Stronger opening and closing
+    - More persuasive language
+    - Better flow and transitions
+    - Enhanced readability
+  </Accordion>
+</AccordionGroup>
+
+**Example**:
+
+```diff
+- Original:
+  "The thing that we want to do is make our product better 
+  so that people will want to use it more."
+
++ Improved:
+  "We aim to enhance our product to increase user engagement 
+  and satisfaction."
+  
+  Changes:
+  - Removed filler ("the thing that")
+  - Used stronger verbs ("enhance" vs "make better")
+  - More professional tone
+  - Clearer, more direct statement
+```
+
+### 9. Simplify 🔍
+
+**What it does**: Makes complex text accessible
+
+**Techniques**:
+- Replace jargon with plain language
+- Break down complex concepts
+- Use active voice
+- Shorten sentences (aim for 15-20 words)
+- Add examples and analogies
+
+**Before/After Example**:
+
+<CodeGroup>
+```text Before (Complex)
+The implementation of a comprehensive algorithmic approach to data 
+processing necessitates the utilization of advanced computational 
+methodologies that facilitate the optimization of resource allocation 
+while simultaneously minimizing latency-induced performance degradation.
+```
+
+```text After (Simplified)
+To process data efficiently, we use smart algorithms that:
+1. Use resources wisely
+2. Reduce delays
+3. Improve overall speed
+
+This approach helps systems run faster while using less power.
+```
+</CodeGroup>
+
+### 10. Expand Ideas 📈
+
+**What it does**: Adds depth and detail to concepts
+
+**Expansion Methods**:
+1. **Deeper explanation**: More detailed breakdown
+2. **Examples**: Real-world cases and scenarios
+3. **Evidence**: Supporting data and research
+4. **Connections**: Related concepts and implications
+5. **Applications**: How to use the ideas practically
+
+**Example**:
+
+```markdown
+Original:
+"Regular exercise improves health."
+
+Expanded:
+"Regular exercise improves health through multiple mechanisms:
+
+1. Cardiovascular Benefits
+   - Strengthens heart muscle (40% reduction in heart disease risk)
+   - Improves circulation and oxygen delivery
+   - Reduces blood pressure (average 5-10 mmHg decrease)
+   - Example: 30 minutes of brisk walking daily
+
+2. Metabolic Effects
+   - Increases insulin sensitivity by 20-30%
+   - Boosts metabolism for 24-48 hours post-exercise
+   - Helps maintain healthy weight
+   - Example: Resistance training 2-3x per week
+
+3. Mental Health
+   - Reduces depression symptoms (as effective as medication in studies)
+   - Decreases anxiety through endorphin release
+   - Improves sleep quality
+   - Example: Any exercise you enjoy for consistency
+
+Recommendations:
+- Start with 150 minutes/week moderate activity (WHO guidelines)
+- Include both cardio and strength training
+- Find activities you enjoy for long-term adherence
+```
+
+## How to Use Quick Actions
+
+<Steps>
+  <Step title="Select Text or Code">
+    Highlight the content you want to transform
+  </Step>
+  
+  <Step title="Choose Action">
+    Click the appropriate quick action button in the interface
+  </Step>
+  
+  <Step title="Review Result">
+    The AI processes your selection with optimized prompts
+  </Step>
+  
+  <Step title="Iterate if Needed">
+    Apply multiple actions sequentially (e.g., Optimize → Add Comments)
+  </Step>
+</Steps>
+
+## Technical Implementation
+
+### Quick Action Structure
+
+```typescript
+// From: src/data/templates.ts
+
+interface QuickAction {
+  id: string;                    // Unique identifier
+  name: string;                  // Display name
+  icon: string;                  // Icon emoji
+  action: string;                // Action type
+  description: string;           // What it does
+  requiresSelection: boolean;    // Must select text first
+  modelSpecific?: string[];      // Recommended models
+  systemPrompt: string;          // Expert instructions
+  userMessageTemplate: string;   // Template with {selectedText}
+}
+```
+
+### Example Quick Action Definition
+
+```typescript
+// Explain Code quick action
+{
+  id: 'explain-code',
+  name: 'Explain Code',
+  icon: '💡',
+  action: 'explain',
+  description: 'Get a clear explanation of the selected code with examples',
+  requiresSelection: true,
+  modelSpecific: ['gpt-4', 'claude-3', 'codellama'],
+  systemPrompt: `You are a programming educator...`,
+  userMessageTemplate: `Please explain this code in detail:
+
+\`\`\`
+{selectedText}
+\`\`\`
+
+Include:
+- Overall purpose and functionality
+- Step-by-step execution flow
+- Important constructs
+- Best practices used
+- Potential limitations`
+}
+```
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Select Appropriately" icon="mouse-pointer">
+    Select complete functions, paragraphs, or logical units - not fragments
+  </Card>
+  
+  <Card title="Chain Actions" icon="link">
+    Apply multiple actions: Debug → Optimize → Add Comments for complete improvement
+  </Card>
+  
+  <Card title="Context Matters" icon="info">
+    Provide surrounding context when selecting complex code or technical text
+  </Card>
+  
+  <Card title="Review Results" icon="eye">
+    Always review AI suggestions - they're helpers, not replacements for judgment
+  </Card>
+</CardGroup>
+
+## Recommended Models
+
+Quick Actions work with all models, but some excel at specific tasks:
+
+| Action | Best Models | Why |
+|--------|-------------|-----|
+| **Code Actions** | GPT-4, Claude 4.5, CodeLlama | Superior code understanding |
+| **Translate** | GPT-4, Claude-3, Gemini Pro | Strong multilingual capabilities |
+| **Summarize** | Claude 4.5, GPT-5.2 | Excellent comprehension |
+| **Improve Writing** | Claude 4.5, GPT-4 | Natural language expertise |
+| **Simplify** | GPT-4, Claude-3 | Clear explanation abilities |
+| **Expand** | GPT-5.2, Claude 4.5, Gemini 3 | Creative and comprehensive |
+
+<Note>
+All 10 quick actions are available in `src/data/templates.ts` as part of the `QUICK_ACTIONS` array.
+</Note>
+
+<Card title="Next: Image Generation" icon="image" href="/features/image-generation">
+  Learn about AI-powered image generation with automatic retry
+</Card>

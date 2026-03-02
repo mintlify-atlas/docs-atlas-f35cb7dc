@@ -1,0 +1,280 @@
+---
+title: 'Templates'
+description: 'ConversationTemplate, QuickAction, and TemplateCategory types'
+---
+
+## ConversationTemplate
+
+Pre-configured conversation templates for common tasks.
+
+<ResponseField name="id" type="string" required>
+  Unique identifier for the template
+</ResponseField>
+
+<ResponseField name="name" type="string" required>
+  Display name of the template
+</ResponseField>
+
+<ResponseField name="category" type="TemplateCategory" required>
+  Category this template belongs to (see [TemplateCategory](#templatecategory))
+</ResponseField>
+
+<ResponseField name="description" type="string" required>
+  Description of what the template does
+</ResponseField>
+
+<ResponseField name="systemPrompt" type="string" required>
+  System instruction that configures the AI's behavior for this template
+</ResponseField>
+
+<ResponseField name="userMessage" type="string" required>
+  Pre-filled user message that starts the conversation
+</ResponseField>
+
+<ResponseField name="tags" type="string[]" required>
+  Tags for searching and filtering templates
+</ResponseField>
+
+<ResponseField name="isCustom" type="boolean" required>
+  Whether this is a user-created custom template
+</ResponseField>
+
+<ResponseField name="modelSpecific" type="string[]">
+  Array of model IDs that this template works best with
+</ResponseField>
+
+<ResponseField name="icon" type="string">
+  Icon identifier for the template
+</ResponseField>
+
+<ResponseField name="color" type="string">
+  Color code for the template's visual representation
+</ResponseField>
+
+<ResponseField name="examples" type="string[]">
+  Example use cases or sample outputs for this template
+</ResponseField>
+
+### Example
+
+```typescript
+const template: ConversationTemplate = {
+  id: 'code-review',
+  name: 'Code Review',
+  category: 'programming',
+  description: 'Get detailed code reviews with suggestions for improvements',
+  systemPrompt: 'You are an experienced code reviewer. Analyze code for bugs, performance issues, and best practices. Provide constructive feedback.',
+  userMessage: 'Please review this code:\n\n',
+  tags: ['code', 'review', 'programming', 'quality'],
+  isCustom: false,
+  modelSpecific: ['gpt-4', 'claude-3-opus'],
+  icon: 'code-review',
+  color: '#6366f1',
+  examples: [
+    'Review a pull request',
+    'Check code for security vulnerabilities',
+    'Suggest performance optimizations'
+  ]
+};
+```
+
+---
+
+## QuickAction
+
+Quick actions for common text transformations and operations.
+
+<ResponseField name="id" type="string" required>
+  Unique identifier for the action
+</ResponseField>
+
+<ResponseField name="name" type="string" required>
+  Display name of the action
+</ResponseField>
+
+<ResponseField name="icon" type="string" required>
+  Icon identifier for the action
+</ResponseField>
+
+<ResponseField name="action" type="QuickActionType" required>
+  The type of action (see [QuickActionType](#quickactiontype))
+</ResponseField>
+
+<ResponseField name="description" type="string" required>
+  Description of what the action does
+</ResponseField>
+
+<ResponseField name="requiresSelection" type="boolean" required>
+  Whether the action requires text to be selected
+</ResponseField>
+
+<ResponseField name="modelSpecific" type="string[]">
+  Array of model IDs that this action works best with
+</ResponseField>
+
+<ResponseField name="systemPrompt" type="string">
+  Custom system prompt for this action
+</ResponseField>
+
+<ResponseField name="userMessageTemplate" type="string">
+  Template for the user message, with `{selection}` placeholder for selected text
+</ResponseField>
+
+### Example
+
+```typescript
+const action: QuickAction = {
+  id: 'explain-code',
+  name: 'Explain Code',
+  icon: 'lightbulb',
+  action: 'explain',
+  description: 'Get a detailed explanation of selected code',
+  requiresSelection: true,
+  modelSpecific: ['gpt-4', 'claude-3-sonnet'],
+  systemPrompt: 'You are a patient coding instructor. Explain code clearly and thoroughly.',
+  userMessageTemplate: 'Please explain this code:\n\n{selection}'
+};
+```
+
+---
+
+## TemplateCategory
+
+Categories for organizing conversation templates.
+
+```typescript
+type TemplateCategory =
+  | 'programming'
+  | 'writing'
+  | 'analysis'
+  | 'creative'
+  | 'learning'
+  | 'business'
+  | 'personal';
+```
+
+<ResponseField name="'programming'" type="category">
+  Templates for coding, debugging, and software development
+</ResponseField>
+
+<ResponseField name="'writing'" type="category">
+  Templates for writing assistance, editing, and content creation
+</ResponseField>
+
+<ResponseField name="'analysis'" type="category">
+  Templates for data analysis, research, and critical thinking
+</ResponseField>
+
+<ResponseField name="'creative'" type="category">
+  Templates for creative tasks like storytelling, brainstorming, and design
+</ResponseField>
+
+<ResponseField name="'learning'" type="category">
+  Templates for educational purposes and learning new topics
+</ResponseField>
+
+<ResponseField name="'business'" type="category">
+  Templates for business tasks like emails, proposals, and presentations
+</ResponseField>
+
+<ResponseField name="'personal'" type="category">
+  Templates for personal assistance and daily tasks
+</ResponseField>
+
+---
+
+## QuickActionType
+
+Available quick action types.
+
+```typescript
+type QuickActionType =
+  | 'explain'
+  | 'optimize'
+  | 'debug'
+  | 'comment'
+  | 'translate'
+  | 'summarize'
+  | 'review'
+  | 'improve'
+  | 'simplify'
+  | 'expand';
+```
+
+<ResponseField name="'explain'" type="action">
+  Explain or clarify selected text or code
+</ResponseField>
+
+<ResponseField name="'optimize'" type="action">
+  Optimize code or content for better performance or clarity
+</ResponseField>
+
+<ResponseField name="'debug'" type="action">
+  Debug code and find issues
+</ResponseField>
+
+<ResponseField name="'comment'" type="action">
+  Add comments or documentation to code
+</ResponseField>
+
+<ResponseField name="'translate'" type="action">
+  Translate text to another language
+</ResponseField>
+
+<ResponseField name="'summarize'" type="action">
+  Create a concise summary of the content
+</ResponseField>
+
+<ResponseField name="'review'" type="action">
+  Review and provide feedback on content
+</ResponseField>
+
+<ResponseField name="'improve'" type="action">
+  Suggest improvements and enhancements
+</ResponseField>
+
+<ResponseField name="'simplify'" type="action">
+  Simplify complex content
+</ResponseField>
+
+<ResponseField name="'expand'" type="action">
+  Expand or elaborate on content
+</ResponseField>
+
+---
+
+## TemplateCategoryInfo
+
+Metadata for template categories used in the UI.
+
+<ResponseField name="id" type="TemplateCategory" required>
+  The category identifier
+</ResponseField>
+
+<ResponseField name="name" type="string" required>
+  Display name of the category
+</ResponseField>
+
+<ResponseField name="description" type="string" required>
+  Description of the category
+</ResponseField>
+
+<ResponseField name="icon" type="string" required>
+  Icon identifier for the category
+</ResponseField>
+
+<ResponseField name="color" type="string" required>
+  Color code for the category
+</ResponseField>
+
+### Example
+
+```typescript
+const categoryInfo: TemplateCategoryInfo = {
+  id: 'programming',
+  name: 'Programming',
+  description: 'Code development and technical tasks',
+  icon: 'code',
+  color: '#6366f1'
+};
+```

@@ -1,0 +1,554 @@
+---
+title: 'AI Image Generation'
+description: 'Generate images with multimodal AI models featuring automatic retry and fallback'
+icon: 'image'
+---
+
+## Overview
+
+PolyChat-AI includes powerful AI image generation capabilities using multimodal language models. The system features automatic retry logic, fallback models, and prompt optimization to ensure reliable image generation.
+
+## Supported Models
+
+<CardGroup cols={3}>
+  <Card title="Gemini 2.5 Flash" icon="google">
+    **Free tier available**
+    
+    Fast generation with good quality
+  </Card>
+  
+  <Card title="GPT-4o" icon="openai">
+    **Premium model**
+    
+    High-quality multimodal capabilities
+  </Card>
+  
+  <Card title="Claude 3.5/3.7" icon="sparkles">
+    **Premium model**
+    
+    Excellent at image generation
+  </Card>
+</CardGroup>
+
+### Model Selection
+
+From the source code (`src/services/openRouter.ts`):
+
+```typescript
+// Known image generation models
+const imageGenerationModels = [
+  'google/gemini-2.5-flash-image-preview:free',  // Free tier
+  'google/gemini-2.5-flash-image-preview',       // Premium
+  'google/gemini-2.5-flash-exp-03-25',           // Experimental
+  'openai/gpt-4o',                               // OpenAI multimodal
+  'openai/gpt-4o-mini',                          // Smaller GPT-4o
+  'anthropic/claude-3.5-sonnet',                 // Claude 3.5
+  'anthropic/claude-3.7-sonnet'                  // Latest Claude
+];
+```
+
+## Image Sizes
+
+Supported resolution options:
+
+- **256×256**: Quick previews and thumbnails
+- **512×512**: Standard social media images
+- **1024×1024**: High-resolution outputs
+
+<Note>
+Actual size support depends on the specific model selected. Most modern models support all three sizes.
+</Note>
+
+## Style Presets
+
+Enhance your images with professional style options:
+
+<Tabs>
+  <Tab title="Artistic Styles">
+    - **Natural**: Photography-like, realistic images
+    - **Vivid**: Vibrant colors and high contrast
+    - **Digital Art**: Clean, modern digital illustration
+    - **Anime**: Japanese animation style
+  </Tab>
+  
+  <Tab title="Traditional Art">
+    - **Oil Painting**: Classic painted texture and style
+    - **Watercolor**: Soft, flowing watercolor effects
+    - **Photorealistic**: Maximum realism and detail
+  </Tab>
+</Tabs>
+
+## Mood Settings
+
+Set the atmosphere of your generated images:
+
+| Mood | Effect |
+|------|--------|
+| **Bright** | Cheerful, well-lit, positive atmosphere |
+| **Dark** | Moody, mysterious, dramatic shadows |
+| **Serene** | Peaceful, calm, tranquil feeling |
+| **Dramatic** | Intense, high-contrast, impactful |
+| **Playful** | Fun, energetic, whimsical |
+| **Mysterious** | Enigmatic, intriguing, subtle |
+
+## Lighting Options
+
+Control the lighting in your images:
+
+- **Natural**: Outdoor daylight simulation
+- **Studio**: Professional controlled lighting
+- **Dramatic**: Strong shadows and highlights
+- **Soft**: Diffused, gentle illumination
+- **Neon**: Vibrant artificial lighting
+- **Golden Hour**: Warm sunset/sunrise glow
+
+## Smart Features
+
+### Automatic Prompt Optimization
+
+The system automatically enhances your prompts for better results:
+
+```typescript
+// From: src/services/openRouter.ts
+
+export const optimizeImagePrompt = (prompt: string): string => {
+  let optimizedPrompt = prompt;
+  
+  // Add detail if prompt is short
+  if (prompt.length < 50) {
+    optimizedPrompt += 
+      ', highly detailed, professional quality, vibrant colors, ' +
+      'sharp focus, high resolution';
+  }
+  
+  // Add style if not specified
+  if (!prompt.toLowerCase().includes('style')) {
+    optimizedPrompt += ', digital art style';
+  }
+  
+  // Add quality parameters
+  if (!prompt.toLowerCase().includes('resolution')) {
+    optimizedPrompt += ', high resolution, photorealistic';
+  }
+  
+  return optimizedPrompt;
+};
+```
+
+**What Gets Added**:
+- Professional quality descriptors
+- Resolution and detail specifications
+- Style guidance if missing
+- Technical quality parameters
+
+### Advanced Prompt Builder
+
+For fine-grained control, use the advanced prompt builder:
+
+```typescript
+// From: src/services/openRouter.ts
+
+createAdvancedImagePrompt(
+  "A serene mountain landscape",
+  {
+    style: 'photorealistic',
+    mood: 'serene',
+    lighting: 'golden_hour',
+    composition: 'rule_of_thirds',
+    quality: 'ultra_hd'
+  }
+)
+
+// Generated prompt:
+// "A serene mountain landscape, photorealistic, highly detailed,
+// serene and peaceful atmosphere, golden hour lighting,
+// rule of thirds composition, ultra high definition,
+// extremely detailed, professional quality, sharp focus,
+// well-composed"
+```
+
+**Available Options**:
+
+<CodeGroup>
+```typescript Style Options
+type Style = 
+  | 'natural'          // Natural photography
+  | 'vivid'            // Vivid and colorful
+  | 'digital_art'      // Digital art style
+  | 'photorealistic'   // Maximum realism
+  | 'anime'            // Anime style
+  | 'oil_painting'     // Oil painting
+  | 'watercolor';      // Watercolor
+```
+
+```typescript Mood Options  
+type Mood =
+  | 'bright'      // Bright and cheerful
+  | 'dark'        // Dark and moody
+  | 'serene'      // Serene and peaceful
+  | 'dramatic'    // Dramatic and intense
+  | 'playful'     // Playful and fun
+  | 'mysterious'; // Mysterious
+```
+
+```typescript Lighting Options
+type Lighting =
+  | 'natural'      // Natural lighting
+  | 'studio'       // Studio lighting
+  | 'dramatic'     // Dramatic shadows
+  | 'soft'         // Soft diffused
+  | 'neon'         // Neon lighting
+  | 'golden_hour'; // Golden hour
+```
+
+```typescript Composition Options
+type Composition =
+  | 'centered'        // Centered subject
+  | 'rule_of_thirds'  // Rule of thirds
+  | 'wide_angle'      // Wide angle view
+  | 'close_up'        // Close-up details
+  | 'birds_eye';      // Bird's eye view
+```
+</CodeGroup>
+
+## Automatic Retry & Fallback
+
+One of the most powerful features: **reliable image generation with automatic retry**.
+
+### How It Works
+
+```typescript
+// From: src/services/openRouter.ts
+
+export const generateImageReliable = async (
+  prompt: string,
+  apiKey: string,
+  primaryModel?: string,
+  options: {
+    maxRetries?: number;        // Default: 3
+    fallbackModels?: string[];  // Auto fallback chain
+    size?: string;
+    style?: string;
+    quality?: string;
+  } = {}
+): Promise<string | MessageContent[]>
+```
+
+**Retry Logic**:
+
+<Steps>
+  <Step title="Primary Model Attempt">
+    Try the selected model with your prompt (up to 3 retries)
+  </Step>
+  
+  <Step title="Exponential Backoff">
+    Wait between retries: 1s, 2s, 4s (prevents rate limiting)
+  </Step>
+  
+  <Step title="Fallback Models">
+    If primary fails, try fallback models automatically:
+    1. Gemini 2.5 Flash (free)
+    2. Gemini 2.5 Flash (premium)
+    3. Gemini experimental
+    4. GPT-4o
+    5. Claude 3.5 Sonnet
+  </Step>
+  
+  <Step title="Validation">
+    Verify that response contains valid image URL
+  </Step>
+  
+  <Step title="Success or Detailed Error">
+    Return image or comprehensive error message with suggestions
+  </Step>
+</Steps>
+
+### Retry Configuration
+
+```typescript
+// Example: Custom retry configuration
+
+const result = await generateImageReliable(
+  "A futuristic cityscape at sunset",
+  apiKey,
+  'google/gemini-2.5-flash-image-preview',
+  {
+    maxRetries: 5,  // More attempts
+    fallbackModels: [
+      'openai/gpt-4o',
+      'anthropic/claude-3.7-sonnet'
+    ],
+    size: '1024x1024',
+    quality: 'hd'
+  }
+);
+```
+
+## Using Image Generation
+
+### Basic Usage
+
+<Steps>
+  <Step title="Select Image Model">
+    Choose an image-capable model in settings (look for 🎨 icon)
+  </Step>
+  
+  <Step title="Write Image Prompt">
+    Describe the image you want:
+    ```text
+    Generate an image of a serene mountain lake at sunset,
+    with pine trees reflected in the water, photorealistic style
+    ```
+  </Step>
+  
+  <Step title="Send Message">
+    The system automatically detects image requests and optimizes your prompt
+  </Step>
+  
+  <Step title="Automatic Generation">
+    - Prompt is optimized
+    - Sent to selected model
+    - Automatic retry if needed
+    - Image appears in chat
+  </Step>
+</Steps>
+
+### Advanced Usage
+
+```typescript
+// Direct API call for programmatic usage
+
+import { generateImageReliable } from './services/openRouter';
+
+const generateCustomImage = async () => {
+  const result = await generateImageReliable(
+    "A cyberpunk street market",
+    process.env.OPENROUTER_API_KEY,
+    'google/gemini-2.5-flash-image-preview:free',
+    {
+      maxRetries: 3,
+      size: '1024x1024',
+      style: 'digital_art',
+      quality: 'hd'
+    }
+  );
+  
+  // Result is either:
+  // - Array of MessageContent with image URLs
+  // - String with error message
+  
+  if (Array.isArray(result)) {
+    const imageContent = result.find(c => c.type === 'image_url');
+    if (imageContent) {
+      console.log('Image URL:', imageContent.image_url.url);
+    }
+  }
+};
+```
+
+## Error Handling
+
+### Comprehensive Error Messages
+
+When all retries fail, you get detailed guidance:
+
+```markdown
+❌ Error de génération d'image: Impossible de générer l'image après 
+avoir essayé 5 modèles avec 3 tentatives chacun.
+
+Suggestions:
+• Vérifiez votre connexion internet
+• Vérifiez que votre clé API OpenRouter est valide
+• Essayez avec un prompt plus simple
+• Réessayez dans quelques instants
+
+Le système a automatiquement essayé plusieurs modèles et méthodes 
+pour garantir la génération de votre image.
+```
+
+### Fallback Response
+
+If generation completely fails, a descriptive fallback is provided:
+
+```typescript
+// From: src/services/openRouter.ts
+
+export const createFallbackImage = (prompt: string): MessageContent[] => {
+  return [{
+    type: 'text',
+    text: `🎨 Image demandée: "${prompt}"
+    
+    Bien que la génération automatique ait rencontré des difficultés,
+    voici une description détaillée de l'image qui aurait été créée:
+    
+    **Description visuelle:**
+    • Composition professionnelle avec sujet central bien éclairé
+    • Palette de couleurs vibrantes et harmonieuses
+    • Détails techniques de haute qualité
+    • Style artistique adapté au sujet
+    
+    **Paramètres techniques:**
+    • Résolution: 1024×1024 pixels
+    • Format: PNG avec transparence
+    • Qualité: Haute définition
+    • Style: Numérique moderne`
+  }];
+};
+```
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Writing Effective Prompts">
+    **Be Specific**:
+    - ✅ "A golden retriever puppy playing in autumn leaves, photorealistic"
+    - ❌ "A dog"
+    
+    **Include Key Elements**:
+    - Subject (what/who)
+    - Setting (where)
+    - Style (how it should look)
+    - Mood (atmosphere)
+    - Lighting (time of day, type)
+    
+    **Use Descriptive Language**:
+    - Colors: "vibrant blue", "muted earth tones"
+    - Textures: "smooth glass", "rough stone"
+    - Atmosphere: "misty morning", "dramatic sunset"
+  </Accordion>
+  
+  <Accordion title="Choosing Models">
+    **For Speed**: Gemini 2.5 Flash (free tier)
+    - Fast generation
+    - Good quality
+    - Free to use
+    
+    **For Quality**: GPT-4o or Claude 3.7
+    - Superior detail
+    - Better prompt understanding
+    - Premium pricing
+    
+    **For Experimentation**: Try multiple models
+    - Use multi-model chat
+    - Compare outputs
+    - Find your preferred model
+  </Accordion>
+  
+  <Accordion title="Optimizing Results">
+    **Iterate on Prompts**:
+    1. Start with basic description
+    2. Add style and mood
+    3. Specify lighting and composition
+    4. Refine based on results
+    
+    **Use Advanced Options**:
+    - Specify style preset
+    - Set mood and lighting
+    - Choose optimal size
+    - Request high quality
+    
+    **Leverage Automatic Retry**:
+    - System handles failures automatically
+    - No manual retry needed
+    - Fallback models ensure success
+  </Accordion>
+  
+  <Accordion title="Managing Costs">
+    **Start Free**: Use Gemini 2.5 Flash free tier
+    
+    **Monitor Usage**: Check dashboard with Ctrl+U
+    
+    **Optimize Generation**:
+    - Use 512×512 for drafts
+    - 1024×1024 only for finals
+    - Batch similar requests
+    
+    **Smart Model Selection**:
+    - Free models for experimentation
+    - Premium for important projects
+  </Accordion>
+</AccordionGroup>
+
+## Technical Details
+
+### API Integration
+
+```typescript
+// Image generation uses OpenRouter API
+
+const response = await fetch(API_URL, {
+  method: 'POST',
+  headers: {
+    'Authorization': `Bearer ${apiKey}`,
+    'Content-Type': 'application/json',
+    'HTTP-Referer': window.location.origin,
+    'X-Title': 'PolyChat AI'
+  },
+  body: JSON.stringify({
+    model: imageModel,
+    messages: [
+      {
+        role: 'system',
+        content: 'You are an expert AI image generator...'
+      },
+      {
+        role: 'user', 
+        content: optimizedPrompt
+      }
+    ]
+  })
+});
+```
+
+### Response Format
+
+```typescript
+// Images are returned as MessageContent array
+
+type MessageContent = 
+  | { type: 'text'; text: string }
+  | { type: 'image_url'; image_url: { url: string } };
+
+// Example response:
+[
+  { type: 'text', text: 'Here is your generated image:' },
+  { 
+    type: 'image_url', 
+    image_url: { 
+      url: 'https://example.com/generated-image.png' 
+    }
+  }
+]
+```
+
+## Example Prompts
+
+<CodeGroup>
+```text Landscape
+A majestic mountain range at sunrise, with misty valleys below,
+golden hour lighting, photorealistic style, rule of thirds composition,
+snow-capped peaks, vibrant orange and pink sky, 8k quality
+```
+
+```text Portrait  
+A wise elderly woman with silver hair, warm smile, soft natural lighting,
+shallow depth of field, photorealistic, gentle wrinkles showing character,
+warm earth tones, professional portrait photography style
+```
+
+```text Abstract
+Abstract flowing liquid metal forms, iridescent colors shifting between
+blue and purple, dramatic studio lighting, high contrast, digital art style,
+smooth gradients, modern and futuristic, 4k quality
+```
+
+```text Architecture
+Modern glass skyscraper at twilight, reflecting sunset colors,
+minimalist design, dramatic upward angle, architectural photography,
+clean lines, blue hour lighting, urban landscape, professional quality
+```
+</CodeGroup>
+
+<Card title="Next: RAG Context" icon="database" href="/features/rag-context">
+  Learn about RAG-powered context enhancement with local embeddings
+</Card>

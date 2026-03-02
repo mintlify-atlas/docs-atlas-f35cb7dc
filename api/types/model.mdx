@@ -1,0 +1,67 @@
+---
+title: 'Model'
+description: 'Model interface for AI model configuration'
+---
+
+## Model
+
+Represents an AI model available in PolyChat-AI.
+
+<ResponseField name="id" type="string" required>
+  Unique identifier for the model (e.g., 'gpt-4', 'claude-3-opus')
+</ResponseField>
+
+<ResponseField name="name" type="string" required>
+  Display name for the model
+</ResponseField>
+
+<ResponseField name="description" type="string">
+  Description of the model's capabilities and use cases
+</ResponseField>
+
+<ResponseField name="context_length" type="number">
+  Maximum context length (in tokens) supported by the model
+</ResponseField>
+
+### Example
+
+```typescript
+const model: Model = {
+  id: 'gpt-4-turbo',
+  name: 'GPT-4 Turbo',
+  description: 'Most capable GPT-4 model with improved performance and lower cost',
+  context_length: 128000
+};
+```
+
+### Usage
+
+Models are used throughout the application to:
+- Display available AI models to users
+- Configure chat sessions with specific models
+- Track which model generated each message
+- Filter templates and quick actions by model compatibility
+
+```typescript
+// Display model selector
+const models: Model[] = [
+  {
+    id: 'gpt-4',
+    name: 'GPT-4',
+    description: 'Most capable model for complex tasks',
+    context_length: 8192
+  },
+  {
+    id: 'gpt-3.5-turbo',
+    name: 'GPT-3.5 Turbo',
+    description: 'Fast and efficient for most tasks',
+    context_length: 16385
+  },
+  {
+    id: 'claude-3-opus',
+    name: 'Claude 3 Opus',
+    description: 'Anthropic\'s most powerful model',
+    context_length: 200000
+  }
+];
+```

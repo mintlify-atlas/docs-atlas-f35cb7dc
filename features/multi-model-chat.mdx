@@ -1,0 +1,305 @@
+---
+title: 'Multi-Model Chat'
+description: 'Run up to 3 AI models simultaneously in a grid layout for comparison'
+icon: 'grid-2x2'
+---
+
+## Overview
+
+PolyChat-AI's multi-model chat feature allows you to run up to 3 different AI models simultaneously on the same prompt, enabling direct comparison of responses, capabilities, and performance across models.
+
+## Key Capabilities
+
+<CardGroup cols={2}>
+  <Card title="Side-by-Side Comparison" icon="columns-3">
+    View responses from multiple models in a clean grid layout
+  </Card>
+  <Card title="Model Diversity" icon="stars">
+    Access 100+ models from GPT-4, Claude, Gemini, and more
+  </Card>
+  <Card title="Synchronized Input" icon="arrows-split-up-and-left">
+    Send the same message to all selected models at once
+  </Card>
+  <Card title="Independent Responses" icon="sparkles">
+    Each model generates its response independently with full context
+  </Card>
+</CardGroup>
+
+## How It Works
+
+### Activating Multi-Model Mode
+
+1. Click the **multi-model icon** in the chat interface
+2. Enable grid view to activate comparison mode
+3. Select up to 3 different models from the dropdown
+4. Start chatting - your message goes to all selected models
+
+<Steps>
+  <Step title="Enable Grid View">
+    Click the grid icon in the top navigation to switch to multi-model layout
+  </Step>
+  
+  <Step title="Select Models">
+    Choose 2-3 different models you want to compare. Popular combinations:
+    - GPT-5.2 + Claude 4.5 Sonnet + Gemini 3 Flash
+    - DeepSeek V3.2 + Minimax M2.5 + GPT-4o
+  </Step>
+  
+  <Step title="Send Message">
+    Type your message once - it's automatically sent to all selected models
+  </Step>
+  
+  <Step title="Compare Responses">
+    View responses side-by-side in the grid layout with model identification
+  </Step>
+</Steps>
+
+## Popular Model Combinations
+
+### For Coding Tasks
+
+```typescript
+// Recommended: Compare specialized coding models
+const codingModels = [
+  'openai/gpt-4o',              // General purpose, strong at code
+  'anthropic/claude-4.5-sonnet', // Excellent reasoning
+  'google/gemini-3-flash-preview' // Fast, good at code
+];
+```
+
+**Why this combination?**
+- GPT-4o: Broad programming knowledge
+- Claude 4.5: Superior code reasoning and debugging
+- Gemini 3 Flash: Quick responses with 1M token context
+
+### For Creative Writing
+
+```typescript
+const creativeModels = [
+  'anthropic/claude-4.5-sonnet',  // Nuanced, natural language
+  'openai/gpt-5.2',               // Creative and diverse
+  'google/gemini-3-flash-preview' // Fast iterations
+];
+```
+
+### For Analysis Tasks
+
+```typescript
+const analysisModels = [
+  'anthropic/claude-4.5-sonnet',    // Deep reasoning
+  'deepseek/deepseek-v3.2-20251201', // Cost-effective, analytical
+  'openai/gpt-5.2'                   // Comprehensive analysis
+];
+```
+
+## Model Selection
+
+### Available Models
+
+Access to **100+ language models** via OpenRouter:
+
+<Tabs>
+  <Tab title="Top Trending (2026)">
+    From `src/services/openRouter.ts`, current trending models:
+    
+    - **Minimax M2.5** - Top trending #1, newest model
+    - **Kimi K2.5** - Chinese AI, highly performant
+    - **Gemini 3 Flash** - 1M token context from Google
+    - **DeepSeek V3.2** - Excellent quality/price ratio
+    - **Claude 4.5 Sonnet** - Latest from Anthropic
+    - **GPT-5.2** - 400K context from OpenAI
+  </Tab>
+  
+  <Tab title="Free Models">
+    Available for testing without credits:
+    
+    ```typescript
+    // From getTopWeeklyModels() function
+    {
+      id: 'openrouter/free',
+      name: 'Free Models',
+      desc: 'Accès gratuit aux modèles IA',
+      emoji: '🎁',
+      isFree: true
+    }
+    ```
+  </Tab>
+  
+  <Tab title="Specialized Models">
+    - **Code**: Models with strong programming capabilities
+    - **Image**: Multimodal models for image generation
+    - **Long Context**: Models with 200K+ token windows
+    - **Speed**: Fast-response models like Flash variants
+  </Tab>
+</Tabs>
+
+### Model Information Display
+
+Each response shows:
+- Model name and identifier
+- Response generation time
+- Character/token count
+- Model capabilities (coding, vision, etc.)
+
+## Grid Layout
+
+### Visual Organization
+
+```text
+┌─────────────────┬─────────────────┬─────────────────┐
+│   GPT-5.2      │  Claude 4.5     │  Gemini 3 Flash │
+│                 │                 │                 │
+│   Response 1    │   Response 2    │   Response 3    │
+│                 │                 │                 │
+│   [Regenerate]  │   [Regenerate]  │   [Regenerate]  │
+└─────────────────┴─────────────────┴─────────────────┘
+```
+
+### Responsive Design
+
+- **Desktop**: 3-column grid layout
+- **Tablet**: 2-column layout (third model stacks below)
+- **Mobile**: Single column, swipeable between models
+
+## Features in Multi-Model Mode
+
+### Independent Controls
+
+Each model window supports:
+- **Individual regeneration**: Regenerate response from one model only
+- **Copy response**: Copy specific model's response to clipboard
+- **Model switching**: Change a model in one panel without affecting others
+
+### Synchronized Features
+
+- **Message history**: Shared across all model panels
+- **System prompts**: Applied to all models uniformly
+- **RAG context**: Same context enhancement for all models
+- **Templates**: Applied to all models simultaneously
+
+<Note>
+When using templates in multi-model mode, the same system prompt and user message template is applied to all selected models.
+</Note>
+
+## Use Cases
+
+<AccordionGroup>
+  <Accordion title="Model Selection & Testing">
+    **Use Case**: Trying to decide which model works best for your use case
+    
+    **Approach**:
+    1. Select 3 candidate models
+    2. Send representative prompts
+    3. Compare quality, speed, and style
+    4. Choose the best performer for your needs
+    
+    **Example**: Testing code generation quality across GPT-4o, Claude, and DeepSeek
+  </Accordion>
+
+  <Accordion title="Quality Assurance">
+    **Use Case**: Ensuring response accuracy and consistency
+    
+    **Approach**:
+    1. Use multiple models to verify facts
+    2. Compare responses for consistency
+    3. Identify hallucinations or errors
+    4. Get consensus on complex topics
+    
+    **Example**: Verifying technical documentation across multiple models
+  </Accordion>
+
+  <Accordion title="Creative Exploration">
+    **Use Case**: Generating diverse creative options
+    
+    **Approach**:
+    1. Select models with different "personalities"
+    2. Generate multiple creative variations
+    3. Cherry-pick best elements from each
+    4. Combine ideas for final output
+    
+    **Example**: Writing product descriptions with different tones and styles
+  </Accordion>
+
+  <Accordion title="Performance Benchmarking">
+    **Use Case**: Comparing model speed and efficiency
+    
+    **Approach**:
+    1. Send identical complex prompts
+    2. Measure response time for each model
+    3. Compare output quality vs speed
+    4. Optimize cost/performance ratio
+    
+    **Example**: Finding the fastest model that maintains acceptable quality
+  </Accordion>
+</AccordionGroup>
+
+## Technical Implementation
+
+### Concurrent API Calls
+
+```typescript
+// From: src/hooks/useChat.tsx
+// Multi-model sends messages to all models concurrently
+
+const sendMessageToAll = async (message: string) => {
+  const selectedModels = [model1, model2, model3].filter(Boolean);
+  
+  // Send to all models in parallel
+  const promises = selectedModels.map(model => 
+    streamAIResponse(messages, apiKey, model, onChunk, systemPrompt)
+  );
+  
+  // Wait for all responses
+  await Promise.all(promises);
+};
+```
+
+### Performance Optimization
+
+- **Parallel processing**: All models receive requests simultaneously
+- **Independent streaming**: Each model streams independently
+- **Abort controllers**: Cancel individual model requests without affecting others
+- **Resource management**: Efficient memory handling for multiple responses
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Start with 2 Models" icon="binary">
+    Begin with 2 models for easier comparison, add a third for comprehensive testing
+  </Card>
+  
+  <Card title="Mix Price Points" icon="dollar-sign">
+    Combine premium and budget models to balance cost and quality
+  </Card>
+  
+  <Card title="Use Diverse Models" icon="shuffle">
+    Select models from different providers for varied perspectives
+  </Card>
+  
+  <Card title="Monitor Usage" icon="chart-line">
+    Multi-model mode uses more API credits - track with Ctrl+U
+  </Card>
+</CardGroup>
+
+### Cost Considerations
+
+<Warning>
+**API Usage**: Running 3 models simultaneously uses 3x the API credits. Monitor your usage dashboard (`Ctrl/Cmd + U`) to track costs.
+</Warning>
+
+**Cost Optimization Strategies**:
+1. Use free or budget models for initial testing
+2. Switch to premium models only when needed
+3. Use 2 models instead of 3 when appropriate
+4. Combine one premium model with budget alternatives
+
+## Limitations
+
+- **Maximum 3 models**: Interface supports up to 3 simultaneous models
+- **API rate limits**: Subject to OpenRouter API rate limits per model
+- **Browser performance**: Many long conversations may impact browser performance
+- **Context windows**: Each model has its own context window limits
+
+<Card title="Next: Templates" icon="scroll" href="/features/templates">
+  Explore 16+ pre-built conversation templates across 7 categories
+</Card>

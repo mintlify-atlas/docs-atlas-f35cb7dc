@@ -1,0 +1,497 @@
+---
+title: 'useSettings'
+description: 'Hook for managing application settings, API keys, themes, and user preferences'
+icon: 'gear'
+---
+
+## Overview
+
+The `useSettings` hook manages all application settings using Zustand with persistence. It handles API keys, model selection, theming, system prompts, and user preferences with automatic localStorage synchronization.
+
+## Import
+
+```typescript
+import { useSettings } from '@/hooks/useSettings';
+```
+
+## Usage
+
+```typescript
+const {
+  apiKey,
+  selectedModel,
+  theme,
+  accent,
+  systemPrompt,
+  tone,
+  notificationsEnabled,
+  ragEnabled,
+  hasOnboarded,
+  setApiKey,
+  setTheme,
+  toggleTheme,
+  toggleSettings,
+} = useSettings();
+```
+
+## State Properties
+
+<ResponseField name="apiKey" type="string">
+  OpenRouter API key for authentication. Defaults to empty string.
+</ResponseField>
+
+<ResponseField name="selectedModel" type="string">
+  Currently selected default model ID. Defaults to empty string (user selects during onboarding).
+</ResponseField>
+
+<ResponseField name="theme" type="'light' | 'dark'">
+  Current UI theme. Defaults to 'dark'.
+</ResponseField>
+
+<ResponseField name="accent" type="'violet' | 'blue' | 'green' | 'rose' | 'orange' | 'teal' | 'red' | 'cyan'">
+  Accent color for the UI. Defaults to 'violet'.
+</ResponseField>
+
+<ResponseField name="systemPrompt" type="string">
+  Custom system prompt for AI conversations. Defaults to empty string.
+</ResponseField>
+
+<ResponseField name="tone" type="'neutre' | 'formel' | 'amical' | 'professionnel' | 'enthousiaste'">
+  Conversation tone preference. Defaults to 'neutre'.
+</ResponseField>
+
+<ResponseField name="notificationsEnabled" type="boolean">
+  Whether browser notifications are enabled. Defaults to true.
+</ResponseField>
+
+<ResponseField name="ragEnabled" type="boolean">
+  Whether RAG (Retrieval-Augmented Generation) is enabled. Defaults to true.
+</ResponseField>
+
+<ResponseField name="hasOnboarded" type="boolean">
+  Whether the user has completed the onboarding flow. Defaults to false.
+</ResponseField>
+
+<ResponseField name="isSettingsOpen" type="boolean">
+  Whether the settings panel is currently open. Not persisted.
+</ResponseField>
+
+<ResponseField name="showConfigurationPopup" type="boolean">
+  Whether a configuration popup is shown. Not persisted.
+</ResponseField>
+
+<ResponseField name="configurationPopupType" type="'missing-api-key' | 'configuration-error' | null">
+  Type of configuration popup being displayed. Not persisted.
+</ResponseField>
+
+## Setter Methods
+
+### setApiKey
+
+Sets the OpenRouter API key.
+
+```typescript
+setApiKey(apiKey: string): void
+```
+
+<ParamField path="apiKey" type="string" required>
+  OpenRouter API key.
+</ParamField>
+
+**Example:**
+```typescript
+const { setApiKey } = useSettings();
+
+setApiKey('sk-or-v1-...');
+```
+
+### setSelectedModel
+
+Sets the default model for new conversations.
+
+```typescript
+setSelectedModel(model: string): void
+```
+
+<ParamField path="model" type="string" required>
+  Model ID (e.g., 'anthropic/claude-3.5-sonnet').
+</ParamField>
+
+**Example:**
+```typescript
+const { setSelectedModel } = useSettings();
+
+setSelectedModel('openai/gpt-4-turbo');
+```
+
+### setTheme
+
+Sets the UI theme.
+
+```typescript
+setTheme(theme: 'light' | 'dark'): void
+```
+
+<ParamField path="theme" type="'light' | 'dark'" required>
+  Theme mode.
+</ParamField>
+
+**Example:**
+```typescript
+const { setTheme } = useSettings();
+
+setTheme('dark');
+```
+
+### setAccent
+
+Sets the accent color.
+
+```typescript
+setAccent(accent: 'violet' | 'blue' | 'green' | 'rose' | 'orange' | 'teal' | 'red' | 'cyan'): void
+```
+
+<ParamField path="accent" type="string" required>
+  Accent color name.
+</ParamField>
+
+**Example:**
+```typescript
+const { setAccent } = useSettings();
+
+setAccent('blue');
+```
+
+### setSystemPrompt
+
+Sets the system prompt for AI conversations.
+
+```typescript
+setSystemPrompt(systemPrompt: string): void
+```
+
+<ParamField path="systemPrompt" type="string" required>
+  Custom system instruction for the AI.
+</ParamField>
+
+**Example:**
+```typescript
+const { setSystemPrompt } = useSettings();
+
+setSystemPrompt('You are a helpful coding assistant specializing in React.');
+```
+
+### setTone
+
+Sets the conversation tone.
+
+```typescript
+setTone(tone: 'neutre' | 'formel' | 'amical' | 'professionnel' | 'enthousiaste'): void
+```
+
+<ParamField path="tone" type="string" required>
+  Tone preference.
+</ParamField>
+
+**Example:**
+```typescript
+const { setTone } = useSettings();
+
+setTone('professionnel');
+```
+
+### setNotificationsEnabled
+
+Enables or disables browser notifications.
+
+```typescript
+setNotificationsEnabled(enabled: boolean): void
+```
+
+<ParamField path="enabled" type="boolean" required>
+  Whether to enable notifications.
+</ParamField>
+
+### setRagEnabled
+
+Enables or disables RAG (Retrieval-Augmented Generation).
+
+```typescript
+setRagEnabled(enabled: boolean): void
+```
+
+<ParamField path="enabled" type="boolean" required>
+  Whether to enable RAG.
+</ParamField>
+
+**Example:**
+```typescript
+const { setRagEnabled } = useSettings();
+
+setRagEnabled(true); // Enable context retrieval
+```
+
+### setHasOnboarded
+
+Marks the user as having completed onboarding.
+
+```typescript
+setHasOnboarded(hasOnboarded: boolean): void
+```
+
+<ParamField path="hasOnboarded" type="boolean" required>
+  Whether onboarding is complete.
+</ParamField>
+
+### setShowConfigurationPopup
+
+Shows or hides a configuration popup.
+
+```typescript
+setShowConfigurationPopup(show: boolean, type?: 'missing-api-key' | 'configuration-error'): void
+```
+
+<ParamField path="show" type="boolean" required>
+  Whether to show the popup.
+</ParamField>
+
+<ParamField path="type" type="'missing-api-key' | 'configuration-error'">
+  Type of popup to display.
+</ParamField>
+
+**Example:**
+```typescript
+const { setShowConfigurationPopup } = useSettings();
+
+// Show API key missing popup
+setShowConfigurationPopup(true, 'missing-api-key');
+
+// Hide popup
+setShowConfigurationPopup(false);
+```
+
+## Toggle Methods
+
+### toggleTheme
+
+Toggles between light and dark theme.
+
+```typescript
+toggleTheme(): void
+```
+
+**Example:**
+```typescript
+const { theme, toggleTheme } = useSettings();
+
+return (
+  <button onClick={toggleTheme}>
+    {theme === 'light' ? '🌙' : '☀️'}
+  </button>
+);
+```
+
+### toggleSettings
+
+Toggles the settings panel open/closed.
+
+```typescript
+toggleSettings(): void
+```
+
+### closeSettings
+
+Closes the settings panel.
+
+```typescript
+closeSettings(): void
+```
+
+## Types
+
+### Settings
+
+```typescript
+interface Settings {
+  apiKey: string;
+  selectedModel: string;
+  theme: 'light' | 'dark';
+  accent?: 'violet' | 'blue' | 'green' | 'rose' | 'orange' | 'teal' | 'red' | 'cyan';
+  systemPrompt: string;
+  tone?: 'neutre' | 'formel' | 'amical' | 'professionnel' | 'enthousiaste';
+  notificationsEnabled?: boolean;
+  ragEnabled?: boolean;
+  hasOnboarded?: boolean;
+}
+```
+
+## Default Values
+
+```typescript
+const DEFAULT_SETTINGS: Settings = {
+  apiKey: '',
+  selectedModel: '',
+  theme: 'dark',
+  accent: 'violet',
+  systemPrompt: '',
+  tone: 'neutre',
+  notificationsEnabled: true,
+  ragEnabled: true,
+  hasOnboarded: false,
+};
+```
+
+## Persistence
+
+Settings are automatically persisted to localStorage using Zustand's persist middleware:
+
+```typescript
+persist(
+  (set, get) => ({ /* store */ }),
+  { name: 'polychat-settings' }
+)
+```
+
+**Storage key:** `polychat-settings`
+
+## Integration with useChat
+
+The `useChat` hook subscribes to `selectedModel` changes to update temporary sessions:
+
+```typescript
+useSettings.subscribe((state, prevState) => {
+  if (state.selectedModel !== prevState?.selectedModel) {
+    // Update temporary session model
+  }
+});
+```
+
+## Example: Settings Panel
+
+```typescript
+import { useSettings } from '@/hooks/useSettings';
+
+function SettingsPanel() {
+  const {
+    apiKey,
+    theme,
+    accent,
+    systemPrompt,
+    tone,
+    ragEnabled,
+    setApiKey,
+    toggleTheme,
+    setAccent,
+    setSystemPrompt,
+    setTone,
+    setRagEnabled,
+  } = useSettings();
+
+  return (
+    <div>
+      <h2>Settings</h2>
+
+      <label>
+        API Key:
+        <input
+          type="password"
+          value={apiKey}
+          onChange={(e) => setApiKey(e.target.value)}
+          placeholder="sk-or-v1-..."
+        />
+      </label>
+
+      <button onClick={toggleTheme}>
+        Theme: {theme}
+      </button>
+
+      <label>
+        Accent Color:
+        <select value={accent} onChange={(e) => setAccent(e.target.value)}>
+          <option value="violet">Violet</option>
+          <option value="blue">Blue</option>
+          <option value="green">Green</option>
+          <option value="rose">Rose</option>
+        </select>
+      </label>
+
+      <label>
+        System Prompt:
+        <textarea
+          value={systemPrompt}
+          onChange={(e) => setSystemPrompt(e.target.value)}
+          placeholder="Custom instructions for the AI..."
+        />
+      </label>
+
+      <label>
+        Tone:
+        <select value={tone} onChange={(e) => setTone(e.target.value)}>
+          <option value="neutre">Neutre</option>
+          <option value="formel">Formel</option>
+          <option value="amical">Amical</option>
+          <option value="professionnel">Professionnel</option>
+          <option value="enthousiaste">Enthousiaste</option>
+        </select>
+      </label>
+
+      <label>
+        <input
+          type="checkbox"
+          checked={ragEnabled}
+          onChange={(e) => setRagEnabled(e.target.checked)}
+        />
+        Enable RAG (Context Retrieval)
+      </label>
+    </div>
+  );
+}
+```
+
+## Example: Onboarding Flow
+
+```typescript
+import { useSettings } from '@/hooks/useSettings';
+import { useModels } from '@/hooks/useModels';
+
+function Onboarding() {
+  const { hasOnboarded, setApiKey, setSelectedModel, setHasOnboarded } = useSettings();
+  const { models } = useModels();
+  const [key, setKey] = useState('');
+  const [model, setModel] = useState('');
+
+  if (hasOnboarded) return null;
+
+  const handleComplete = () => {
+    setApiKey(key);
+    setSelectedModel(model);
+    setHasOnboarded(true);
+  };
+
+  return (
+    <div>
+      <h1>Welcome to PolyChat-AI</h1>
+      
+      <input
+        type="password"
+        placeholder="OpenRouter API Key"
+        value={key}
+        onChange={(e) => setKey(e.target.value)}
+      />
+
+      <select value={model} onChange={(e) => setModel(e.target.value)}>
+        <option value="">Select a model...</option>
+        {models.map((m) => (
+          <option key={m.id} value={m.id}>
+            {m.name || m.id}
+          </option>
+        ))}
+      </select>
+
+      <button onClick={handleComplete} disabled={!key || !model}>
+        Get Started
+      </button>
+    </div>
+  );
+}
+```

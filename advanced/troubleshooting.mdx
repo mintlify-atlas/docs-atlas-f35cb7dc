@@ -1,0 +1,638 @@
+---
+title: "Troubleshooting"
+description: "Common issues, solutions, and debugging tips for PolyChat-AI"
+icon: "wrench"
+---
+
+## Common Issues
+
+### API Key Problems
+
+<AccordionGroup>
+  <Accordion title="Error: 'API error: 401' or 'Invalid API key'">
+    **Cause**: Your OpenRouter API key is invalid, expired, or incorrectly formatted.
+    
+    **Solutions**:
+    
+    <Steps>
+      <Step title="Verify your API key">
+        1. Go to [OpenRouter Keys](https://openrouter.ai/keys)
+        2. Check if your key is active and not expired
+        3. Copy the key again (make sure no extra spaces)
+      </Step>
+      
+      <Step title="Update in PolyChat-AI">
+        1. Open Settings (`Ctrl+,` or `Cmd+,`)
+        2. Paste the new key in the "Clé API OpenRouter" field
+        3. Click "Sauvegarder"
+      </Step>
+      
+      <Step title="Test the connection">
+        Send a test message to verify the key works
+      </Step>
+    </Steps>
+    
+    <Warning>
+      API keys starting with `sk-or-v1-` are the correct format. If yours doesn't match, it may be invalid.
+    </Warning>
+  </Accordion>
+  
+  <Accordion title="Error: 'API error: 402' or 'Insufficient credits'">
+    **Cause**: Your OpenRouter account has insufficient credits or hasn't been funded.
+    
+    **Solutions**:
+    
+    1. Visit [OpenRouter Credits](https://openrouter.ai/credits) to add funds
+    2. Check your current balance in the OpenRouter dashboard
+    3. Consider using free models (filter by "Free" in model selection)
+    
+    **Free model alternatives**:
+    - `openrouter/free` - Access to free models
+    - Look for models with "Free" badge in Settings
+  </Accordion>
+  
+  <Accordion title="Settings won't save API key">
+    **Cause**: Browser localStorage issues or JavaScript errors.
+    
+    **Solutions**:
+    
+    <Tabs>
+      <Tab title="Check Browser Storage">
+        1. Open DevTools (`F12`)
+        2. Go to "Application" → "Local Storage"
+        3. Find the `polychat-settings` entry
+        4. Verify it updates when you save
+      </Tab>
+      
+      <Tab title="Clear Cache">
+        1. Try clearing browser cache and reloading
+        2. Hard refresh: `Ctrl+Shift+R` (Windows/Linux) or `Cmd+Shift+R` (Mac)
+      </Tab>
+      
+      <Tab title="Browser Compatibility">
+        Ensure you're using a supported browser:
+        - Chrome 90+
+        - Firefox 88+
+        - Safari 14+
+        - Edge 90+
+      </Tab>
+    </Tabs>
+  </Accordion>
+</AccordionGroup>
+
+### Connection & Network Issues
+
+<AccordionGroup>
+  <Accordion title="Error: 'Failed to fetch AI response' or network timeout">
+    **Cause**: Network connectivity issues or OpenRouter API downtime.
+    
+    **Diagnostic steps**:
+    
+    ```bash
+    # Test OpenRouter API directly
+    curl -I https://openrouter.ai/api/v1/models
+    ```
+    
+    **Solutions**:
+    
+    <Steps>
+      <Step title="Check your internet connection">
+        Verify you're online and can access other websites
+      </Step>
+      
+      <Step title="Check OpenRouter status">
+        Visit [OpenRouter Status](https://status.openrouter.ai) or check their [Discord](https://discord.gg/openrouter)
+      </Step>
+      
+      <Step title="Try a different network">
+        Corporate firewalls may block OpenRouter. Try:
+        - Mobile hotspot
+        - VPN
+        - Different WiFi network
+      </Step>
+      
+      <Step title="Check for CORS issues">
+        Open DevTools Console (`F12`) and look for CORS errors. If present, this is an OpenRouter API issue.
+      </Step>
+    </Steps>
+  </Accordion>
+  
+  <Accordion title="Slow response times">
+    **Cause**: Model overload, network latency, or complex prompts.
+    
+    **Solutions**:
+    
+    <CardGroup cols={2}>
+      <Card title="Switch models" icon="arrows-rotate">
+        Faster alternatives:
+        - `google/gemini-3-flash` (very fast)
+        - `deepseek/deepseek-v3.2` (good speed/quality)
+        - Any model with "flash" in the name
+      </Card>
+      
+      <Card title="Enable streaming" icon="water">
+        Streaming responses feel faster by showing results as they arrive. This should be enabled by default.
+      </Card>
+      
+      <Card title="Simplify prompts" icon="scissors">
+        Shorter, clearer prompts typically get faster responses.
+      </Card>
+      
+      <Card title="Check Usage Dashboard" icon="chart-line">
+        Press `Ctrl+U` to compare response times across models you've used.
+      </Card>
+    </CardGroup>
+  </Accordion>
+  
+  <Accordion title="Error: 'API error: 429' - Rate limit exceeded">
+    **Cause**: You've sent too many requests in a short time period.
+    
+    **Solutions**:
+    
+    1. **Wait**: Rate limits reset after a short period (usually 1 minute)
+    2. **Reduce request frequency**: Add a small delay between messages
+    3. **Upgrade account**: Higher OpenRouter tiers have higher rate limits
+    4. **Check if you're making duplicate requests**: Debug with DevTools Network tab
+    
+    <Info>
+      If you're rate limited on free models, try switching to a paid model which may have different limits.
+    </Info>
+  </Accordion>
+</AccordionGroup>
+
+### Model & Response Issues
+
+<AccordionGroup>
+  <Accordion title="Model not available or deprecated">
+    **Cause**: The selected model has been removed or renamed by the provider.
+    
+    **Solutions**:
+    
+    <Steps>
+      <Step title="Open Settings">
+        Press `Ctrl+,` (or `Cmd+,`)
+      </Step>
+      
+      <Step title="Search for updated models">
+        In the "Modèle par défaut" section:
+        - Look for the same provider (e.g., "anthropic", "openai")
+        - Find a newer version (higher version number)
+        - Check the "created" date to find recent models
+      </Step>
+      
+      <Step title="Select and save">
+        Click the new model and save settings
+      </Step>
+    </Steps>
+    
+    **Example**: If `anthropic/claude-3-opus` is unavailable, try `anthropic/claude-4.5-sonnet` instead.
+  </Accordion>
+  
+  <Accordion title="Poor quality responses or hallucinations">
+    **Cause**: Model limitations, unclear prompts, or inappropriate model selection.
+    
+    **Solutions**:
+    
+    <Tabs>
+      <Tab title="Improve Your Prompt">
+        - Be specific and detailed
+        - Provide context and examples
+        - Use system prompts for consistent behavior
+        - Break complex tasks into steps
+      </Tab>
+      
+      <Tab title="Try Better Models">
+        Higher-quality models (though more expensive):
+        - `anthropic/claude-4.5-sonnet`
+        - `openai/gpt-5.2`
+        - `google/gemini-3-flash`
+      </Tab>
+      
+      <Tab title="Use System Prompts">
+        Set a system prompt in Settings:
+        ```
+        You are a helpful assistant. Provide accurate, 
+        well-researched answers. If you're unsure, 
+        say so rather than guessing.
+        ```
+      </Tab>
+      
+      <Tab title="Multi-Model Comparison">
+        Use PolyChat-AI's multi-model feature:
+        1. Select multiple models for one conversation
+        2. Compare their responses
+        3. Identify which model works best for your task
+      </Tab>
+    </Tabs>
+  </Accordion>
+  
+  <Accordion title="Response cut off or incomplete">
+    **Cause**: Token limit reached or streaming interruption.
+    
+    **Solutions**:
+    
+    1. **Check model context length**: 
+       - Open Settings and view "Ctx" column
+       - Models with higher context (e.g., 200k) can handle longer responses
+    
+    2. **Ask for continuation**:
+       ```
+       Please continue from where you left off.
+       ```
+    
+    3. **Simplify your request**: Break into smaller questions
+    
+    4. **Streaming issue**: If streaming was interrupted:
+       - Check your network connection
+       - Try sending the message again
+       - See code reference: `src/services/openRouter.ts:144-189`
+  </Accordion>
+  
+  <Accordion title="Image generation not working">
+    **Cause**: Wrong model selected or model doesn't support image generation.
+    
+    **Solutions**:
+    
+    <Steps>
+      <Step title="Verify model supports images">
+        Only certain models can generate images. Check the model ID contains:
+        - `gemini-2.5-flash-image`
+        - `gpt-4o`
+        - `claude-3.5-sonnet` or `claude-3.7-sonnet`
+        
+        See `src/services/openRouter.ts:538-551` for the complete list.
+      </Step>
+      
+      <Step title="Use dedicated image models">
+        The app provides `getImageModels()` to fetch image-capable models. These are filtered to show only models with `text+image->text+image` modality.
+      </Step>
+      
+      <Step title="Check error message">
+        If you see "Le modèle X ne supporte pas la génération d'images", switch to a supported model.
+      </Step>
+    </Steps>
+    
+    <Note>
+      Image generation uses the `generateImageReliable()` function which automatically retries with fallback models. See `src/services/openRouter.ts:734-824`
+    </Note>
+  </Accordion>
+</AccordionGroup>
+
+### UI & Display Issues
+
+<AccordionGroup>
+  <Accordion title="Usage Dashboard shows no data">
+    **Cause**: No messages sent yet, or localStorage was cleared.
+    
+    **Diagnostic**:
+    
+    1. Check browser DevTools:
+       - Open DevTools (`F12`)
+       - Application → Local Storage
+       - Find `polychat-usage-stats`
+    
+    2. Verify data structure:
+       ```json
+       {
+         "totalConversations": 0,
+         "totalMessages": 0,
+         "totalUserMessages": 0,
+         "totalAssistantMessages": 0,
+         "avgResponseTimeMs": 0,
+         "perModel": {},
+         "lastUpdated": "2026-03-02T..."
+       }
+       ```
+    
+    **Solutions**:
+    - Send a test message to start tracking
+    - Check that tracking functions are called (see `src/hooks/useUsageStats.ts:26-90`)
+    - If `lastUpdated` is old, stats may have been reset
+  </Accordion>
+  
+  <Accordion title="Theme or colors not applying">
+    **Cause**: CSS not loaded or theme setting not persisted.
+    
+    **Solutions**:
+    
+    <Steps>
+      <Step title="Check Settings">
+        1. Open Settings (`Ctrl+,`)
+        2. Go to "Apparence" section
+        3. Manually select theme again
+      </Step>
+      
+      <Step title="Verify DOM attributes">
+        Open DevTools Elements tab and check:
+        ```html
+        <html data-theme="dark" data-accent="violet">
+        ```
+      </Step>
+      
+      <Step title="Clear CSS cache">
+        Hard reload: `Ctrl+Shift+R` or `Cmd+Shift+R`
+      </Step>
+    </Steps>
+    
+    Theme changes are applied via:
+    ```typescript
+    document.documentElement.setAttribute('data-theme', newTheme);
+    document.body.className = `theme-${newTheme}`;
+    ```
+    See `src/components/Settings/SettingsModalModern.tsx:65-68`
+  </Accordion>
+  
+  <Accordion title="Settings modal won't open">
+    **Cause**: JavaScript error or keyboard shortcut conflict.
+    
+    **Solutions**:
+    
+    1. **Check DevTools Console** (`F12`): Look for JavaScript errors
+    2. **Try alternative access method**: Use menu instead of `Ctrl+,`
+    3. **Check browser extensions**: Disable extensions that might conflict
+    4. **Reload the page**: Hard refresh and try again
+  </Accordion>
+  
+  <Accordion title="Model list not loading in Settings">
+    **Cause**: Failed to fetch models from OpenRouter API.
+    
+    **Diagnostic**:
+    
+    Open DevTools Network tab and check for:
+    ```
+    Request: https://openrouter.ai/api/v1/models
+    Status: Should be 200 OK
+    ```
+    
+    **Solutions**:
+    
+    - Check network connectivity
+    - Verify no CORS errors in console
+    - Try reloading the page
+    - Check if OpenRouter API is down
+    
+    The app fetches models via `getTopWeeklyModels()` and `getImageModels()` in `src/services/openRouter.ts`
+  </Accordion>
+</AccordionGroup>
+
+## Debugging Tools
+
+### Browser DevTools
+
+Use these DevTools features for debugging:
+
+<Tabs>
+  <Tab title="Console">
+    **Purpose**: View JavaScript errors and logs
+    
+    **How to use**:
+    1. Press `F12` → Console tab
+    2. Look for red error messages
+    3. Check for warnings about API calls
+    
+    **Common errors**:
+    - `Failed to fetch`: Network issue
+    - `Uncaught TypeError`: JavaScript error
+    - `CORS error`: API access issue
+  </Tab>
+  
+  <Tab title="Network">
+    **Purpose**: Monitor API requests
+    
+    **How to use**:
+    1. Press `F12` → Network tab
+    2. Reload page and send a message
+    3. Look for requests to `openrouter.ai`
+    
+    **What to check**:
+    - Status code (should be 200)
+    - Request headers (verify API key)
+    - Response body (actual API response)
+    - Timing (identify slow requests)
+  </Tab>
+  
+  <Tab title="Application">
+    **Purpose**: Inspect localStorage data
+    
+    **How to use**:
+    1. Press `F12` → Application tab
+    2. Local Storage → select your domain
+    3. Find these keys:
+       - `polychat-settings`
+       - `polychat-usage-stats`
+    
+    **What to check**:
+    - API key is stored correctly
+    - Settings persist after reload
+    - Usage stats update after messages
+  </Tab>
+</Tabs>
+
+### Source Code References
+
+Key files to check when debugging:
+
+| Issue Type | File Location | Line Reference |
+|------------|---------------|----------------|
+| API calls | `src/services/openRouter.ts` | Lines 5-97 (fetch), 102-191 (streaming) |
+| Settings persistence | `src/hooks/useSettings.ts` | Check persist middleware |
+| Usage tracking | `src/hooks/useUsageStats.ts` | Lines 26-90 (tracking functions) |
+| Model list | `src/hooks/useModels.ts` | Check model fetching |
+| UI components | `src/components/Settings/` | Settings modal and dashboard |
+
+### Testing API Directly
+
+Test OpenRouter API outside the app:
+
+```bash
+# Test with curl
+curl https://openrouter.ai/api/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "anthropic/claude-4.5-sonnet",
+    "messages": [{"role": "user", "content": "Hello"}]
+  }'
+```
+
+Expected response:
+```json
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "Hello! How can I help you today?"
+      }
+    }
+  ]
+}
+```
+
+If this fails, the issue is with your API key or OpenRouter account, not PolyChat-AI.
+
+## Advanced Debugging
+
+### Enable Verbose Logging
+
+Add console logs to track execution:
+
+```typescript
+// In src/services/openRouter.ts
+export const fetchAIResponse = async (...) => {
+  console.log('API Request:', { messages, model });
+  
+  const response = await fetch(API_URL, ...);
+  console.log('API Response Status:', response.status);
+  
+  const data = await response.json();
+  console.log('API Response Data:', data);
+  
+  return data.choices[0].message.content;
+};
+```
+
+### Monitor State Changes
+
+For Zustand stores, add middleware:
+
+```typescript
+import { create } from 'zustand';
+import { devtools } from 'zustand/middleware';
+
+export const useSettings = create(
+  devtools(
+    persist(
+      (set) => ({
+        // ... your state
+      }),
+      { name: 'polychat-settings' }
+    ),
+    { name: 'Settings Store' }
+  )
+);
+```
+
+Then install [Redux DevTools](https://chrome.google.com/webstore/detail/redux-devtools/) to inspect state.
+
+### Performance Profiling
+
+<Steps>
+  <Step title="Open Performance tab">
+    Press `F12` → Performance
+  </Step>
+  
+  <Step title="Record interaction">
+    Click record, send a message, stop recording
+  </Step>
+  
+  <Step title="Analyze">
+    Look for:
+    - Long tasks (> 50ms)
+    - Network waterfalls
+    - Memory leaks
+  </Step>
+</Steps>
+
+## Getting Help
+
+### Before Asking for Help
+
+Gather this information:
+
+<Checklist>
+  - [ ] Browser version (Chrome 120, Firefox 115, etc.)
+  - [ ] Operating system (Windows 11, macOS 14, etc.)
+  - [ ] Exact error message from console
+  - [ ] Steps to reproduce the issue
+  - [ ] Screenshots of the problem
+  - [ ] Network tab showing failed requests
+</Checklist>
+
+### Resources
+
+<CardGroup cols={2}>
+  <Card title="OpenRouter Discord" icon="discord" href="https://discord.gg/openrouter">
+    Get help with API and model issues
+  </Card>
+  
+  <Card title="OpenRouter Docs" icon="book" href="https://openrouter.ai/docs">
+    Official API documentation
+  </Card>
+  
+  <Card title="GitHub Issues" icon="github">
+    Report bugs in PolyChat-AI (check with your team for the repo URL)
+  </Card>
+  
+  <Card title="Check Status" icon="signal" href="https://status.openrouter.ai">
+    Verify OpenRouter API uptime
+  </Card>
+</CardGroup>
+
+### Error Code Reference
+
+| Code | Meaning | Typical Cause |
+|------|---------|---------------|
+| 400 | Bad Request | Malformed API request |
+| 401 | Unauthorized | Invalid API key |
+| 402 | Payment Required | Insufficient credits |
+| 403 | Forbidden | API key lacks permissions |
+| 429 | Rate Limited | Too many requests |
+| 500 | Server Error | OpenRouter API issue |
+| 502 | Bad Gateway | OpenRouter upstream issue |
+| 503 | Service Unavailable | OpenRouter maintenance |
+
+## Reset & Recovery
+
+### Reset All Settings
+
+<Warning>
+  This will erase all your settings, API key, and preferences. Usage statistics will be preserved.
+</Warning>
+
+<Steps>
+  <Step title="Open DevTools">
+    Press `F12` → Application → Local Storage
+  </Step>
+  
+  <Step title="Delete settings key">
+    Find and delete `polychat-settings`
+  </Step>
+  
+  <Step title="Reload">
+    Refresh the page to start with default settings
+  </Step>
+</Steps>
+
+### Reset Usage Statistics
+
+<Steps>
+  <Step title="Open Usage Dashboard">
+    Press `Ctrl+U` (or `Cmd+U`)
+  </Step>
+  
+  <Step title="Find reset button">
+    Look for "Reset Statistics" or similar option
+  </Step>
+  
+  <Step title="Confirm">
+    Confirm the reset action
+  </Step>
+</Steps>
+
+Or manually via DevTools:
+1. Open DevTools → Application → Local Storage
+2. Delete `polychat-usage-stats`
+3. Reload the page
+
+### Complete Reset
+
+To completely reset PolyChat-AI:
+
+```javascript
+// Run in DevTools Console
+localStorage.clear();
+location.reload();
+```
+
+This deletes ALL local data and reloads the app with defaults.

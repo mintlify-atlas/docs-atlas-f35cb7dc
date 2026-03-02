@@ -1,0 +1,511 @@
+---
+title: 'useChat'
+description: 'Main chat hook for managing conversations, message streaming, and multi-model interactions'
+icon: 'messages'
+---
+
+## Overview
+
+The `useChat` hook is the core state management hook for PolyChat-AI, built with Zustand. It manages chat sessions, message streaming, multi-model support (up to 3 models simultaneously), and conversation templates.
+
+## Import
+
+```typescript
+import { useChat } from '@/hooks/useChat';
+```
+
+## Usage
+
+```typescript
+const {
+  activeSessions,
+  currentSessionId,
+  selectedModels,
+  isAnyLoading,
+  sendMessageToAll,
+  createNewSession,
+  deleteMessage,
+  regenerateMessage,
+  stopStreaming,
+} = useChat();
+```
+
+## State Properties
+
+<ResponseField name="activeSessions" type="ChatSession[]">
+  Array of currently active chat sessions (max 3). Each session represents a conversation with a specific AI model.
+</ResponseField>
+
+<ResponseField name="allSessions" type="ChatSession[]">
+  All saved chat sessions, including inactive ones. Used for session history and switching between conversations.
+</ResponseField>
+
+<ResponseField name="currentSessionId" type="string | null">
+  ID of the currently active/focused session. Used for single-window mode.
+</ResponseField>
+
+<ResponseField name="selectedModels" type="string[]">
+  Array of currently selected model IDs (max 3). Corresponds to the models in activeSessions.
+</ResponseField>
+
+<ResponseField name="isAnyLoading" type="boolean">
+  True if any session is currently loading or streaming a response.
+</ResponseField>
+
+<ResponseField name="abortControllers" type="Record<string, AbortController>">
+  Map of session IDs to AbortControllers for canceling streaming responses.
+</ResponseField>
+
+<ResponseField name="streamingProgress" type="Record<string, { chars: number; start: number; lastUpdate: number }>">
+  Tracks streaming progress for each session, including character count and timing metrics.
+</ResponseField>
+
+<ResponseField name="pendingTemplate" type="ConversationTemplate | null">
+  Template waiting to be applied to the conversation.
+</ResponseField>
+
+<ResponseField name="isInitialized" type="boolean">
+  Whether the chat store has been initialized with saved data.
+</ResponseField>
+
+## Core Methods
+
+### sendMessageToAll
+
+Sends a message to all active sessions simultaneously.
+
+```typescript
+await sendMessageToAll(content: string): Promise<void>
+```
+
+<ParamField path="content" type="string" required>
+  The message content to send to all active models.
+</ParamField>
+
+**Features:**
+- Validates content before sending
+- Filters out pending sessions (not yet assigned a model)
+- Handles image generation detection and routing
+- Integrates with RAG (Retrieval-Augmented Generation) when enabled
+- Applies system prompts and tone settings
+- Streams responses in real-time
+- Sends notifications when complete
+
+**Example:**
+```typescript
+const { sendMessageToAll, activeSessions } = useChat();
+
+// Send a message to all active models
+await sendMessageToAll('Explain quantum computing in simple terms');
+
+// Automatically detects image generation requests
+await sendMessageToAll('Génère une image d\'un coucher de soleil');
+```
+
+### regenerateMessage
+
+Regenerates a specific assistant message.
+
+```typescript
+await regenerateMessage(sessionId: string, messageId: string): Promise<void>
+```
+
+<ParamField path="sessionId" type="string" required>
+  ID of the session containing the message.
+</ParamField>
+
+<ParamField path="messageId" type="string" required>
+  ID of the assistant message to regenerate.
+</ParamField>
+
+**Example:**
+```typescript
+const { regenerateMessage } = useChat();
+
+// Regenerate a specific response
+await regenerateMessage('session-123', 'message-456');
+```
+
+### deleteMessage
+
+Deletes a message from a session.
+
+```typescript
+deleteMessage(sessionId: string, messageId: string): void
+```
+
+<ParamField path="sessionId" type="string" required>
+  ID of the session containing the message.
+</ParamField>
+
+<ParamField path="messageId" type="string" required>
+  ID of the message to delete.
+</ParamField>
+
+### stopStreaming
+
+Stops streaming for one or all sessions.
+
+```typescript
+stopStreaming(sessionId?: string): void
+```
+
+<ParamField path="sessionId" type="string">
+  Optional session ID. If not provided, stops streaming for all sessions.
+</ParamField>
+
+**Example:**
+```typescript
+const { stopStreaming, activeSessions } = useChat();
+
+// Stop a specific session
+stopStreaming('session-123');
+
+// Stop all streaming
+stopStreaming();
+```
+
+## Session Management
+
+### initializeChat
+
+Initializes the chat store, loading saved sessions and creating a temporary session.
+
+```typescript
+initializeChat(): void
+```
+
+**Called automatically on app load.** Loads chat history from localStorage and creates a new temporary session.
+
+### createNewSession
+
+Creates a new chat session with the currently selected model.
+
+```typescript
+createNewSession(): void
+```
+
+### deleteSession
+
+Deletes a session from history.
+
+```typescript
+deleteSession(sessionId: string): void
+```
+
+<ParamField path="sessionId" type="string" required>
+  ID of the session to delete.
+</ParamField>
+
+### setActiveSession
+
+Switches to a different saved session.
+
+```typescript
+setActiveSession(sessionId: string): void
+```
+
+<ParamField path="sessionId" type="string" required>
+  ID of the session to activate.
+</ParamField>
+
+### clearAllChats
+
+Clears all messages from the current session.
+
+```typescript
+clearAllChats(): void
+```
+
+## Multi-Model Management
+
+### addModel
+
+Adds a new model to active sessions (max 3).
+
+```typescript
+addModel(modelId: string): void
+```
+
+<ParamField path="modelId" type="string" required>
+  ID of the model to add (e.g., 'anthropic/claude-3.5-sonnet').
+</ParamField>
+
+**Example:**
+```typescript
+const { addModel, selectedModels } = useChat();
+
+if (selectedModels.length < 3) {
+  addModel('openai/gpt-4-turbo');
+}
+```
+
+### removeModel
+
+Removes a model from active sessions.
+
+```typescript
+removeModel(modelId: string): void
+```
+
+<ParamField path="modelId" type="string" required>
+  ID of the model to remove.
+</ParamField>
+
+### setWindowCount
+
+Sets the number of active chat windows (1-3).
+
+```typescript
+setWindowCount(count: number): void
+```
+
+<ParamField path="count" type="number" required>
+  Number of windows (clamped to 1-3).
+</ParamField>
+
+### setSessionModel
+
+Assigns a model to a pending session.
+
+```typescript
+setSessionModel(sessionId: string, modelId: string): void
+```
+
+<ParamField path="sessionId" type="string" required>
+  ID of the pending session.
+</ParamField>
+
+<ParamField path="modelId" type="string" required>
+  ID of the model to assign.
+</ParamField>
+
+## Template & Quick Actions
+
+### applyTemplate
+
+Applies a conversation template to all active sessions.
+
+```typescript
+applyTemplate(template: ConversationTemplate): void
+```
+
+<ParamField path="template" type="ConversationTemplate" required>
+  Template to apply, containing systemPrompt and userMessage.
+</ParamField>
+
+**Example:**
+```typescript
+const template: ConversationTemplate = {
+  id: 'code-review',
+  name: 'Code Review',
+  category: 'programming',
+  description: 'Review code for quality and bugs',
+  systemPrompt: 'You are an expert code reviewer...',
+  userMessage: 'Please review this code: {code}',
+  tags: ['code', 'review'],
+  isCustom: false,
+};
+
+applyTemplate(template);
+```
+
+### prepareTemplate
+
+Prepares a template for editing before application.
+
+```typescript
+prepareTemplate(template: ConversationTemplate | null): void
+```
+
+<ParamField path="template" type="ConversationTemplate | null" required>
+  Template to prepare, or null to clear.
+</ParamField>
+
+### executeQuickAction
+
+Executes a quick action on selected text.
+
+```typescript
+executeQuickAction(action: QuickAction, selectedText?: string): void
+```
+
+<ParamField path="action" type="QuickAction" required>
+  Quick action to execute (explain, optimize, debug, etc.).
+</ParamField>
+
+<ParamField path="selectedText" type="string">
+  Text to apply the action to (required if action.requiresSelection is true).
+</ParamField>
+
+**Example:**
+```typescript
+const action: QuickAction = {
+  id: 'explain',
+  name: 'Explain',
+  icon: '📖',
+  action: 'explain',
+  description: 'Explain selected code',
+  requiresSelection: true,
+  systemPrompt: 'You are a helpful programming tutor.',
+  userMessageTemplate: 'Explain this code: {selectedText}',
+};
+
+executeQuickAction(action, 'const x = 5;');
+```
+
+## Helper Methods
+
+### createNewTemporarySession
+
+Creates a new temporary session (not saved until first message).
+
+```typescript
+createNewTemporarySession(modelId?: string): ChatSession
+```
+
+<ParamField path="modelId" type="string">
+  Model ID for the session. Defaults to 'default' if not provided.
+</ParamField>
+
+## Types
+
+### ChatSession
+
+```typescript
+interface ChatSession {
+  id: string;
+  modelId: string;
+  modelName: string;
+  messages: Message[];
+  isLoading: boolean;
+  error: string | null;
+  isTemporary?: boolean;
+}
+```
+
+### Message
+
+```typescript
+interface Message {
+  id: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string | MessageContent[];
+  timestamp: Date;
+  modelId?: string;
+  streaming?: boolean;
+  imageData?: GeneratedImage;
+}
+```
+
+### MessageContent
+
+```typescript
+interface MessageContent {
+  type: 'text' | 'image_url';
+  text?: string;
+  image_url?: {
+    url: string;
+    detail?: 'low' | 'high' | 'auto';
+  };
+}
+```
+
+## Features
+
+### Image Generation Detection
+
+The hook automatically detects image generation requests in multiple languages (English, French) using keyword matching:
+
+```typescript
+const keywords = ['génér', 'créer', 'dessin', 'image', 'photo', 'illustration', ...];
+```
+
+When detected with a compatible model, routes to image generation instead of text streaming.
+
+### RAG Integration
+
+When RAG is enabled in settings, the hook automatically retrieves relevant context from conversation history:
+
+```typescript
+if (ragEnabled) {
+  const relevantHistory = await getRelevantContext(content, sessionMessages);
+  contextMessages = [...relevantHistory, lastUserMessage];
+}
+```
+
+### Streaming Progress Tracking
+
+Tracks real-time streaming metrics for each session:
+
+```typescript
+streamingProgress: {
+  'session-123': {
+    chars: 1024,
+    start: 1234567890,
+    lastUpdate: 1234567900
+  }
+}
+```
+
+### Auto-Save
+
+Sessions are automatically saved to localStorage whenever the state changes, excluding empty sessions.
+
+## Example: Complete Chat Flow
+
+```typescript
+import { useChat } from '@/hooks/useChat';
+import { useSettings } from '@/hooks/useSettings';
+
+function ChatComponent() {
+  const {
+    activeSessions,
+    selectedModels,
+    isAnyLoading,
+    sendMessageToAll,
+    addModel,
+    stopStreaming,
+  } = useChat();
+  
+  const { apiKey } = useSettings();
+
+  const handleSend = async (message: string) => {
+    if (!apiKey) {
+      console.error('API key required');
+      return;
+    }
+    
+    await sendMessageToAll(message);
+  };
+
+  const handleAddModel = () => {
+    if (selectedModels.length < 3) {
+      addModel('anthropic/claude-3.5-sonnet');
+    }
+  };
+
+  return (
+    <div>
+      {activeSessions.map((session) => (
+        <div key={session.id}>
+          <h3>{session.modelName}</h3>
+          {session.messages.map((msg) => (
+            <div key={msg.id}>
+              <strong>{msg.role}:</strong> {msg.content}
+            </div>
+          ))}
+        </div>
+      ))}
+      
+      <button onClick={handleAddModel} disabled={selectedModels.length >= 3}>
+        Add Model
+      </button>
+      
+      {isAnyLoading && (
+        <button onClick={() => stopStreaming()}>Stop</button>
+      )}
+    </div>
+  );
+}
+```

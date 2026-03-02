@@ -1,0 +1,210 @@
+---
+title: Configuration
+description: Set up your API key, select models, and configure system instructions for PolyChat-AI
+---
+
+## Overview
+
+PolyChat-AI requires an OpenRouter API key to access 100+ language models. This guide walks you through the initial setup and configuration options.
+
+## API Key Setup
+
+<Steps>
+  <Step title="Get your OpenRouter API key">
+    1. Visit [OpenRouter.ai](https://openrouter.ai/)
+    2. Create a free account
+    3. Navigate to [API Keys](https://openrouter.ai/keys)
+    4. Generate a new API key
+  </Step>
+
+  <Step title="Configure PolyChat-AI">
+    **Automatic Configuration (First Launch)**
+    
+    On first launch, an onboarding modal will appear prompting you to enter your API key.
+    
+    **Manual Configuration**
+    
+    1. Open Settings using `Ctrl/Cmd + K` or click the ⚙️ icon
+    2. Navigate to the "API" section
+    3. Enter your OpenRouter API key (format: `sk-or-v1-...`)
+    4. Click "Save"
+    
+    Your API key is securely stored in your browser's `localStorage`.
+  </Step>
+
+  <Step title="Verify Connection">
+    After saving your API key, check the "System Information" section in Settings:
+    
+    - **API Status**: Should show "Connected"
+    - **Available Models**: Should display the number of accessible models (100+)
+  </Step>
+</Steps>
+
+## Model Selection
+
+### Default Model
+
+Set your preferred default model for new conversations:
+
+1. Open Settings (`Ctrl/Cmd + K`)
+2. Go to "Default Model" section
+3. Use the search bar to filter models by name or provider
+4. Click on a model to select it
+
+**Model Information Display**:
+
+| Column | Description |
+|--------|-------------|
+| **Model** | Model name and provider |
+| **Ctx** | Context window size (in thousands of tokens) |
+| **Price** | Input/Output pricing per 1M tokens |
+| **✓** | Currently selected model |
+
+### Keyboard Navigation
+
+When searching for models in the Settings modal:
+
+- `↑` / `↓` - Navigate through model list
+- `Enter` - Select focused model
+- Type to search by model name or provider
+
+### Model Switching Mid-Conversation
+
+You can change models during an active conversation:
+
+1. Click the model switcher in the header
+2. Select a different model from the dropdown
+3. Your next message will use the newly selected model
+
+### Multi-Model Chat
+
+Compare responses from up to 3 models simultaneously:
+
+1. Click the multi-model icon to enable grid view
+2. Select up to 3 different models
+3. Send a message to see side-by-side responses
+4. Each response shows which model generated it
+
+## System Instructions
+
+### Custom System Prompts
+
+Define how the AI should behave across all conversations:
+
+1. Open Settings (`Ctrl/Cmd + K`)
+2. Navigate to "System Instruction" section
+3. Enter your custom prompt (e.g., "You are a specialist in...")
+4. This instruction is sent at the beginning of each new conversation
+
+**Example System Prompts**:
+
+<Accordion title="Software Development Assistant">
+```
+You are an expert software engineer specializing in TypeScript, React, and modern web development. Provide clear, concise code examples with explanations. Always follow best practices and consider performance implications.
+```
+</Accordion>
+
+<Accordion title="Technical Writer">
+```
+You are a professional technical writer. Create clear, well-structured documentation with proper formatting. Use examples and diagrams when helpful. Write for developers of all skill levels.
+```
+</Accordion>
+
+<Accordion title="Data Analysis Expert">
+```
+You are a data analysis expert. Provide statistical insights, interpret data patterns, and suggest visualization approaches. Explain complex concepts in accessible language.
+```
+</Accordion>
+
+### Conversation Tone
+
+Choose the AI's response style:
+
+| Tone | Description |
+|------|-------------|
+| **Neutral** | Balanced, objective responses |
+| **Formal** | Professional, structured communication |
+| **Friendly** | Warm, conversational style |
+| **Professional** | Business-oriented, polished responses |
+| **Enthusiastic** | Energetic, positive communication |
+
+The selected tone is automatically added to your system instruction.
+
+## Advanced Settings
+
+### RAG (Retrieval Augmented Generation)
+
+**Status**: Experimental
+
+Enables intelligent context enhancement using local embeddings:
+
+- **Technology**: Uses `@xenova/transformers` with all-MiniLM-L6-v2 model
+- **Privacy**: All processing done locally in your browser
+- **Functionality**: Retrieves semantically relevant conversation history
+- **Default**: Enabled
+
+To toggle RAG:
+
+1. Open Settings (`Ctrl/Cmd + K`)
+2. Navigate to "AI Features" section
+3. Toggle "Context Enhancement (RAG)"
+
+### Notifications
+
+Configure browser notifications for AI responses:
+
+1. Open Settings (`Ctrl/Cmd + K`)
+2. Navigate to "Notifications" section
+3. Toggle "Browser Notifications"
+4. Grant browser permission when prompted
+
+**Note**: Notifications alert you when a response is ready, useful when working in other tabs.
+
+## Configuration Storage
+
+All settings are stored locally in your browser:
+
+- **Storage Method**: `localStorage`
+- **Persistence**: Settings persist across browser sessions
+- **Privacy**: No cloud synchronization (data stays on your device)
+- **Export**: Currently no export feature (see roadmap)
+
+<Warning>
+  Clearing your browser data will reset all settings and conversation history. Consider exporting important conversations before clearing browser storage.
+</Warning>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="API Key Not Working">
+    1. Verify the key format starts with `sk-or-v1-`
+    2. Check that the key hasn't expired on OpenRouter.ai
+    3. Ensure you have credits or are within free tier limits
+    4. Try regenerating a new key on OpenRouter
+  </Accordion>
+
+  <Accordion title="No Models Available">
+    1. Verify your API key is correctly configured
+    2. Check your internet connection
+    3. Refresh the page to reload model list
+    4. Check OpenRouter status page for API issues
+  </Accordion>
+
+  <Accordion title="System Prompt Not Applied">
+    1. System prompts only apply to new conversations
+    2. Start a new conversation (`Ctrl/Cmd + N`) to test
+    3. Verify the prompt was saved in Settings
+    4. Check that the prompt doesn't exceed model limits
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Customization" icon="palette" href="/guides/customization">
+    Personalize your interface with themes and accent colors
+  </Card>
+  <Card title="Keyboard Shortcuts" icon="keyboard" href="/guides/keyboard-shortcuts">
+    Master all keyboard shortcuts for efficient workflows
+  </Card>
+</CardGroup>

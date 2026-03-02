@@ -1,0 +1,386 @@
+---
+title: Models API Service
+description: Fetch, filter, and manage AI models from OpenRouter
+---
+
+The Models API service provides comprehensive functions for retrieving, searching, and filtering AI models available through OpenRouter.
+
+## Core Functions
+
+### fetchAllAvailableModels
+
+Retrieves all available models without artificial limits.
+
+```typescript
+fetchAllAvailableModels(): Promise<OpenRouterModel[]>
+```
+
+<ResponseField name="models" type="OpenRouterModel[]">
+  Array of all available models, deduplicated and filtered for valid text-supporting models
+</ResponseField>
+
+**Example:**
+
+```typescript
+const allModels = await fetchAllAvailableModels();
+console.log(`Found ${allModels.length} models`);
+```
+
+---
+
+### fetchAvailableModels
+
+Retrieves models with optional client-side filtering.
+
+```typescript
+fetchAvailableModels(
+  filters?: Partial<ModelFilters>
+): Promise<OpenRouterModel[]>
+```
+
+<ParamField path="filters.searchTerm" type="string">
+  Search in model ID, name, or description
+</ParamField>
+
+<ParamField path="filters.provider" type="string">
+  Filter by provider (e.g., 'openai', 'anthropic', 'google'). Use 'all' for no filtering
+</ParamField>
+
+<ParamField path="filters.contextLength" type="string">
+  Filter by context window size: 'short' (≤8K), 'medium' (8K-32K), 'long' (>32K), or 'all'
+</ParamField>
+
+<ParamField path="filters.priceRange" type="string">
+  Filter by price category: 'free', 'cheap', 'moderate', 'premium', or 'all'
+</ParamField>
+
+**Example:**
+
+```typescript
+// Get all Anthropic models with long context
+const models = await fetchAvailableModels({
+  provider: 'anthropic',
+  contextLength: 'long'
+});
+
+// Search for GPT models
+const gptModels = await fetchAvailableModels({
+  searchTerm: 'gpt'
+});
+```
+
+---
+
+### searchModels
+
+Search for models by name, ID, or description.
+
+```typescript
+searchModels(searchTerm: string): Promise<OpenRouterModel[]>
+```
+
+<ParamField path="searchTerm" type="string" required>
+  Search query (case-insensitive)
+</ParamField>
+
+**Example:**
+
+```typescript
+const claudeModels = await searchModels('claude');
+const visionModels = await searchModels('vision');
+```
+
+---
+
+### getAvailableProviders
+
+Retrieves list of all model providers.
+
+```typescript
+getAvailableProviders(): Promise<string[]>
+```
+
+<ResponseField name="providers" type="string[]">
+  Sorted array of provider names (e.g., ['anthropic', 'google', 'openai'])
+</ResponseField>
+
+**Example:**
+
+```typescript
+const providers = await getAvailableProviders();
+providers.forEach(provider => {
+  console.log(`Provider: ${provider}`);
+});
+```
+
+---
+
+## Pricing Functions
+
+### getModelPricing
+
+Formats model pricing information for display.
+
+```typescript
+getModelPricing(model: OpenRouterModel): string
+```
+
+<ParamField path="model" type="OpenRouterModel" required>
+  Model object containing pricing information
+</ParamField>
+
+<ResponseField name="priceString" type="string">
+  Formatted pricing string (e.g., "In: 0.50$/1M tokens | Out: 1.50$/1M tokens" or "Gratuit")
+</ResponseField>
+
+**Example:**
+
+```typescript
+const model = await fetchAvailableModels()[0];
+const pricing = getModelPricing(model);
+console.log(pricing);
+// "In: 0.30$/1M tokens | Out: 1.50$/1M tokens"
+```
+
+**Output formats:**
+- `"Gratuit"` - Free model (0 cost)
+- `"In: X$/1M tokens | Out: Y$/1M tokens"` - Both input and output pricing
+- `"Input: X$/1M tokens"` - Input-only pricing
+- `"Output: Y$/1M tokens"` - Output-only pricing
+- `"Prix non disponible"` - Pricing unavailable
+
+---
+
+### getPriceCategory
+
+Categorizes model pricing into tiers.
+
+```typescript
+getPriceCategory(model: OpenRouterModel): PriceRange
+```
+
+<ParamField path="model" type="OpenRouterModel" required>
+  Model to categorize
+</ParamField>
+
+<ResponseField name="category" type="PriceRange">
+  One of: 'free', 'cheap', 'moderate', or 'premium'
+</ResponseField>
+
+**Pricing tiers:**
+- `free`: $0 for both input and output
+- `cheap`: ≤ $5 per 1M tokens (average)
+- `moderate`: ≤ $20 per 1M tokens (average)
+- `premium`: > $20 per 1M tokens (average)
+
+**Example:**
+
+```typescript
+const category = getPriceCategory(model);
+if (category === 'free') {
+  console.log('This model is completely free!');
+} else if (category === 'cheap') {
+  console.log('Budget-friendly option');
+}
+```
+
+---
+
+## Utility Functions
+
+### formatModelName
+
+Formats a model ID into a readable display name.
+
+```typescript
+formatModelName(modelId: string): string
+```
+
+<ParamField path="modelId" type="string" required>
+  Full model ID (e.g., "openai/gpt-4-turbo")
+</ParamField>
+
+<ResponseField name="formattedName" type="string">
+  Human-readable name with proper capitalization
+</ResponseField>
+
+**Example:**
+
+```typescript
+const name = formatModelName('anthropic/claude-4.5-sonnet');
+console.log(name); // "Claude 4.5 Sonnet"
+
+const name2 = formatModelName('google/gemini-3-flash-preview');
+console.log(name2); // "Gemini 3 Flash Preview"
+```
+
+---
+
+## Type Definitions
+
+### OpenRouterModel
+
+Complete model information from OpenRouter API.
+
+```typescript
+interface OpenRouterModel {
+  id: string;
+  name: string;
+  description: string;
+  created: number;
+  context_length: number;
+  pricing: {
+    prompt: string;      // Cost per input token
+    completion: string;  // Cost per output token
+    request: string;     // Cost per request
+    image: string;       // Cost per image
+  };
+  architecture: {
+    input_modalities: string[];   // ['text', 'image']
+    output_modalities: string[];  // ['text', 'image']
+    tokenizer: string;
+    instruct_type: string | null;
+  };
+  top_provider: {
+    context_length: number;
+    max_completion_tokens: number;
+    is_moderated: boolean;
+  };
+  supported_parameters: string[];
+}
+```
+
+### ModelFilters
+
+Filter options for model queries.
+
+```typescript
+interface ModelFilters {
+  searchTerm: string;      // Search query
+  provider: string;        // Provider name or 'all'
+  contextLength: string;   // 'short' | 'medium' | 'long' | 'all'
+  priceRange: string;      // 'free' | 'cheap' | 'moderate' | 'premium' | 'all'
+}
+```
+
+### PriceRange
+
+```typescript
+type PriceRange = 'free' | 'cheap' | 'moderate' | 'premium' | 'all';
+```
+
+### ModelsResponse
+
+API response structure.
+
+```typescript
+interface ModelsResponse {
+  data: OpenRouterModel[];
+}
+```
+
+---
+
+## Advanced Usage
+
+### Filtering by Multiple Criteria
+
+```typescript
+// Find affordable long-context models from Anthropic
+const models = await fetchAvailableModels({
+  provider: 'anthropic',
+  contextLength: 'long',
+  priceRange: 'cheap'
+});
+
+models.forEach(model => {
+  console.log(`${model.name}: ${getModelPricing(model)}`);
+});
+```
+
+### Building a Model Selector
+
+```typescript
+// Get all providers
+const providers = await getAvailableProviders();
+
+// For each provider, get their models
+for (const provider of providers) {
+  const models = await fetchAvailableModels({ provider });
+  
+  console.log(`\n${provider.toUpperCase()}:`);
+  models.forEach(model => {
+    const price = getModelPricing(model);
+    const name = formatModelName(model.id);
+    console.log(`  ${name} - ${price}`);
+  });
+}
+```
+
+### Model Comparison
+
+```typescript
+const compareModels = async (modelIds: string[]) => {
+  const allModels = await fetchAllAvailableModels();
+  
+  return modelIds.map(id => {
+    const model = allModels.find(m => m.id === id);
+    if (!model) return null;
+    
+    return {
+      name: formatModelName(model.id),
+      contextLength: model.context_length,
+      pricing: getModelPricing(model),
+      category: getPriceCategory(model),
+      modalities: model.architecture.input_modalities
+    };
+  }).filter(Boolean);
+};
+
+const comparison = await compareModels([
+  'openai/gpt-4o',
+  'anthropic/claude-4.5-sonnet',
+  'google/gemini-3-flash-preview'
+]);
+
+console.table(comparison);
+```
+
+---
+
+## Error Handling
+
+All functions handle errors gracefully and return empty arrays on failure:
+
+```typescript
+try {
+  const models = await fetchAvailableModels();
+  if (models.length === 0) {
+    console.log('No models available or API error');
+  }
+} catch (error) {
+  console.error('Failed to fetch models:', error);
+  // Functions return [] on error, so you get a safe fallback
+}
+```
+
+## Performance Considerations
+
+- **Timeout**: 30-second timeout for API requests
+- **Deduplication**: Automatic removal of duplicate models
+- **Client-side filtering**: All filters applied after fetching for flexibility
+- **Caching**: Consider caching results for 5-10 minutes to reduce API calls
+
+```typescript
+let cachedModels: OpenRouterModel[] | null = null;
+let cacheTime = 0;
+
+const getCachedModels = async () => {
+  const now = Date.now();
+  if (!cachedModels || now - cacheTime > 5 * 60 * 1000) {
+    cachedModels = await fetchAllAvailableModels();
+    cacheTime = now;
+  }
+  return cachedModels;
+};
+```

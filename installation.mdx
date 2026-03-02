@@ -1,0 +1,442 @@
+---
+title: "Installation"
+description: "Set up PolyChat-AI for local development with detailed step-by-step instructions"
+---
+
+## Prerequisites
+
+Before installing PolyChat-AI, ensure you have the following installed on your system:
+
+<CardGroup cols={2}>
+  <Card title="Node.js" icon="node-js">
+    **Version 18 or higher**
+    
+    Download from [nodejs.org](https://nodejs.org/)
+  </Card>
+  
+  <Card title="Package Manager" icon="box">
+    **npm or yarn**
+    
+    Included with Node.js installation
+  </Card>
+  
+  <Card title="Git" icon="git">
+    **Latest version**
+    
+    Download from [git-scm.com](https://git-scm.com/)
+  </Card>
+  
+  <Card title="OpenRouter API Key" icon="key">
+    **Free tier available**
+    
+    Sign up at [openrouter.ai](https://openrouter.ai/)
+  </Card>
+</CardGroup>
+
+### Verify Prerequisites
+
+Check that you have the required versions installed:
+
+```bash
+node --version
+# Should output v18.0.0 or higher
+
+npm --version
+# Should output 8.0.0 or higher
+
+git --version
+# Should output 2.0.0 or higher
+```
+
+## Installation Steps
+
+<Steps>
+  <Step title="Clone the Repository">
+    Clone the PolyChat-AI repository from GitHub:
+
+    ```bash
+    git clone https://github.com/Teeflo/PolyChat-AI.git
+    cd PolyChat-AI
+    ```
+
+    <Tip>
+      If you want to contribute to the project, consider forking the repository first and then cloning your fork.
+    </Tip>
+  </Step>
+
+  <Step title="Install Dependencies">
+    Install all required npm packages:
+
+    <CodeGroup>
+
+    ```bash npm
+    npm install
+    ```
+
+    ```bash yarn
+    yarn install
+    ```
+
+    ```bash pnpm
+    pnpm install
+    ```
+
+    </CodeGroup>
+
+    This will install the following key dependencies:
+
+    | Package | Version | Purpose |
+    |---------|---------|----------|
+    | react | ^19.1.0 | UI framework |
+    | typescript | ~5.8.3 | Type safety |
+    | vite | ^7.0.4 | Build tool |
+    | tailwindcss | ^4.1.11 | Styling |
+    | zustand | ^5.0.7 | State management |
+    | @xenova/transformers | ^2.17.1 | Local embeddings for RAG |
+
+    <Info>
+      The installation may take a few minutes depending on your internet connection. The @xenova/transformers package is particularly large as it includes ML models.
+    </Info>
+  </Step>
+
+  <Step title="Start the Development Server">
+    Launch the Vite development server:
+
+    <CodeGroup>
+
+    ```bash npm
+    npm run dev
+    ```
+
+    ```bash yarn
+    yarn dev
+    ```
+
+    ```bash pnpm
+    pnpm dev
+    ```
+
+    </CodeGroup>
+
+    You should see output similar to:
+
+    ```bash
+    VITE v7.0.4  ready in 432 ms
+
+    ➜  Local:   http://localhost:5173/
+    ➜  Network: use --host to expose
+    ➜  press h + enter to show help
+    ```
+
+    <Tip>
+      The development server supports hot module replacement (HMR), so your changes will be reflected instantly without a full page reload.
+    </Tip>
+  </Step>
+
+  <Step title="Open in Browser">
+    Navigate to the local development URL:
+
+    ```
+    http://localhost:5173
+    ```
+
+    The PolyChat-AI application will load and display an onboarding modal on first launch.
+  </Step>
+
+  <Step title="Configure API Key">
+    On first launch, you'll need to configure your OpenRouter API key:
+
+    1. **Get your API key** from [OpenRouter.ai](https://openrouter.ai/):
+       - Sign up for a free account
+       - Navigate to the **Keys** section
+       - Click **Create Key**
+       - Copy your API key
+
+    2. **Enter the key** in the onboarding modal that appears
+
+    3. **Verify the connection** by selecting a model and sending a test message
+
+    <Warning>
+      Keep your API key secure! It's stored in your browser's localStorage and should never be committed to version control or shared publicly.
+    </Warning>
+
+    If you need to update your API key later:
+    - Open Settings (`Ctrl/Cmd + K`)
+    - Navigate to the **API** tab
+    - Enter your new API key
+  </Step>
+</Steps>
+
+## Project Structure
+
+Understand the organization of the PolyChat-AI codebase:
+
+```
+PolyChat-AI/
+├── public/                    # Static assets (logo, icons)
+├── src/
+│   ├── assets/               # Images and media resources
+│   ├── components/           # React components
+│   │   ├── Chat/             # Chat interface components
+│   │   ├── Layout/           # Header, Sidebar, etc.
+│   │   ├── Settings/         # Settings and configuration
+│   │   ├── Onboarding/       # First-launch experience
+│   │   └── ui/               # Reusable UI components
+│   ├── context/              # React Context providers
+│   ├── data/                 # Static data (templates, etc.)
+│   ├── hooks/                # Custom React hooks
+│   ├── services/             # Business logic and APIs
+│   │   ├── openRouter.ts     # OpenRouter API client
+│   │   ├── ragService.ts     # RAG embeddings service
+│   │   ├── modelsApi.ts      # Model fetching/filtering
+│   │   └── localStorage.ts   # Browser storage
+│   ├── styles/               # Global CSS and themes
+│   ├── types/                # TypeScript type definitions
+│   ├── utils/                # Utility functions
+│   ├── App.tsx               # Root component
+│   └── main.tsx              # Application entry point
+├── .gitignore
+├── .prettierrc               # Code formatting config
+├── eslint.config.js          # Linting rules
+├── package.json              # Dependencies and scripts
+├── tsconfig.json             # TypeScript configuration
+└── vite.config.ts            # Vite build configuration
+```
+
+### Key Files
+
+- **src/services/openRouter.ts**: OpenRouter API integration for chat and image generation
+- **src/services/ragService.ts**: Local embeddings using @xenova/transformers
+- **src/components/Chat/ChatInputModern.tsx**: Main chat input component
+- **src/components/Chat/MessageBubbleModern.tsx**: Message display component
+- **vite.config.ts**: Vite configuration
+
+```typescript vite.config.ts
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig({
+  plugins: [react()],
+});
+```
+
+## Available Scripts
+
+PolyChat-AI includes several npm scripts for development and production:
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server with HMR |
+| `npm run build` | TypeScript type check + production build |
+| `npm run preview` | Preview the production build locally |
+| `npm run lint` | Check code quality with ESLint |
+| `npm run format` | Format code with Prettier |
+
+### Development Workflow
+
+<Steps>
+  <Step title="Start Development">
+    ```bash
+    npm run dev
+    ```
+    
+    Make your changes in `src/` and see them reflected instantly.
+  </Step>
+
+  <Step title="Check Code Quality">
+    ```bash
+    npm run lint
+    ```
+    
+    Fix any linting errors before committing.
+  </Step>
+
+  <Step title="Format Code">
+    ```bash
+    npm run format
+    ```
+    
+    Ensure consistent code formatting.
+  </Step>
+
+  <Step title="Build for Production">
+    ```bash
+    npm run build
+    ```
+    
+    Creates an optimized production build in the `dist/` directory.
+  </Step>
+
+  <Step title="Preview Production Build">
+    ```bash
+    npm run preview
+    ```
+    
+    Test the production build locally before deployment.
+  </Step>
+</Steps>
+
+## Configuration
+
+### Environment Variables
+
+PolyChat-AI doesn't require environment variables for local development. All configuration is done through the UI and stored in localStorage.
+
+However, if you're deploying to production, you may want to pre-configure certain settings. Create a `.env` file in the root directory:
+
+```bash .env
+# Not required - all config is done via UI
+# This is only for advanced deployment scenarios
+VITE_DEFAULT_MODEL=openai/gpt-4o
+VITE_APP_NAME=PolyChat-AI
+```
+
+<Warning>
+  **Never commit API keys** to version control. The `.gitignore` file already excludes `.env` files, but always double-check before committing.
+</Warning>
+
+### Customizing Vite Configuration
+
+To customize the build process, edit `vite.config.ts`:
+
+```typescript vite.config.ts
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    port: 3000, // Change default port
+    open: true, // Auto-open browser
+  },
+  build: {
+    outDir: 'build', // Change output directory
+    sourcemap: true, // Generate source maps
+  },
+});
+```
+
+## Troubleshooting
+
+### Common Installation Issues
+
+<AccordionGroup>
+  <Accordion title="Port 5173 already in use">
+    If port 5173 is already occupied:
+
+    1. Stop the process using port 5173
+    2. Or change the port in `vite.config.ts`:
+       ```typescript
+       server: {
+         port: 3000
+       }
+       ```
+  </Accordion>
+
+  <Accordion title="npm install fails">
+    If `npm install` fails:
+
+    1. Clear npm cache: `npm cache clean --force`
+    2. Delete `node_modules` and `package-lock.json`
+    3. Run `npm install` again
+    4. If still failing, try using Node.js LTS version
+  </Accordion>
+
+  <Accordion title="TypeScript errors on build">
+    If you encounter TypeScript errors:
+
+    1. Check that you're using TypeScript ~5.8.3
+    2. Delete `node_modules` and reinstall
+    3. Run `npx tsc --noEmit` to see detailed errors
+  </Accordion>
+
+  <Accordion title="Slow initial load">
+    The first load may be slow due to:
+
+    - @xenova/transformers downloading ML models
+    - Vite optimizing dependencies
+    
+    Subsequent loads will be much faster due to caching.
+  </Accordion>
+</AccordionGroup>
+
+<Card
+  title="More Troubleshooting Help"
+  icon="wrench"
+  href="/advanced/troubleshooting"
+>
+  View the complete troubleshooting guide for more solutions
+</Card>
+
+## Next Steps
+
+Now that you have PolyChat-AI running locally:
+
+<CardGroup cols={2}>
+  <Card
+    title="Quick Start Guide"
+    icon="rocket"
+    href="/quickstart"
+  >
+    Learn how to use PolyChat-AI effectively
+  </Card>
+
+  <Card
+    title="Core Features"
+    icon="star"
+    href="/features/chat-interface"
+  >
+    Explore all available features
+  </Card>
+
+  <Card
+    title="Configuration"
+    icon="gear"
+    href="/guides/configuration"
+  >
+    Customize PolyChat-AI to your preferences
+  </Card>
+
+  <Card
+    title="Contributing"
+    icon="code-pull-request"
+    href="https://github.com/Teeflo/PolyChat-AI/blob/main/CONTRIBUTING.md"
+  >
+    Learn how to contribute to the project
+  </Card>
+</CardGroup>
+
+## Deployment
+
+Ready to deploy your own instance of PolyChat-AI?
+
+### Deploy to Vercel (Recommended)
+
+The easiest way to deploy PolyChat-AI is with Vercel:
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Teeflo/PolyChat-AI)
+
+1. Click the button above
+2. Connect your GitHub account
+3. Configure your project
+4. Deploy automatically
+
+### Build for Production
+
+To build manually:
+
+```bash
+npm run build
+```
+
+This creates a production-ready build in the `dist/` directory that can be deployed to any static hosting service:
+
+- Vercel
+- Netlify
+- GitHub Pages
+- Cloudflare Pages
+- AWS S3 + CloudFront
+
+<Tip>
+  The production build is optimized with code splitting, minification, and tree-shaking for maximum performance.
+</Tip>

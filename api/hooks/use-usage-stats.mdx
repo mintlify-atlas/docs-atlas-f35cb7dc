@@ -1,0 +1,411 @@
+---
+title: 'useUsageStats'
+description: 'Hook for tracking and analyzing usage statistics across models and conversations'
+icon: 'chart-line'
+---
+
+## Overview
+
+The `useUsageStats` hook tracks usage analytics for PolyChat-AI, including conversation counts, message counts, and response times. Built with Zustand and persisted to localStorage.
+
+## Import
+
+```typescript
+import { useUsageStats } from '@/hooks/useUsageStats';
+```
+
+## Usage
+
+```typescript
+const {
+  totalConversations,
+  totalMessages,
+  totalUserMessages,
+  totalAssistantMessages,
+  avgResponseTimeMs,
+  perModel,
+  lastUpdated,
+  recordUserMessage,
+  recordAssistantResponse,
+  recordNewConversation,
+  resetStats,
+} = useUsageStats();
+```
+
+## State Properties
+
+<ResponseField name="totalConversations" type="number">
+  Total number of conversations started across all models. Defaults to 0.
+</ResponseField>
+
+<ResponseField name="totalMessages" type="number">
+  Total number of messages (user + assistant) across all models. Defaults to 0.
+</ResponseField>
+
+<ResponseField name="totalUserMessages" type="number">
+  Total number of user messages sent. Defaults to 0.
+</ResponseField>
+
+<ResponseField name="totalAssistantMessages" type="number">
+  Total number of assistant responses received. Defaults to 0.
+</ResponseField>
+
+<ResponseField name="avgResponseTimeMs" type="number">
+  Global average response time in milliseconds across all models. Defaults to 0.
+</ResponseField>
+
+<ResponseField name="perModel" type="Record<string, ModelStats>">
+  Statistics broken down by model ID. Each entry contains conversations, messages, and avgResponseTimeMs.
+</ResponseField>
+
+<ResponseField name="lastUpdated" type="string">
+  ISO date string of the last stats update.
+</ResponseField>
+
+## Methods
+
+### recordUserMessage
+
+Records a user message sent to one or more models.
+
+```typescript
+recordUserMessage(modelIds: string[]): void
+```
+
+<ParamField path="modelIds" type="string[]" required>
+  Array of model IDs that received the message.
+</ParamField>
+
+**Updates:**
+- Increments `totalMessages` by the number of models
+- Increments `totalUserMessages` by 1
+- Increments `messages` count for each model in `perModel`
+- Updates `lastUpdated` timestamp
+
+**Example:**
+```typescript
+const { recordUserMessage } = useUsageStats();
+
+// User sends message to 2 models
+recordUserMessage(['openai/gpt-4-turbo', 'anthropic/claude-3.5-sonnet']);
+```
+
+### recordAssistantResponse
+
+Records an assistant response and its response time.
+
+```typescript
+recordAssistantResponse(modelId: string, responseTimeMs: number): void
+```
+
+<ParamField path="modelId" type="string" required>
+  ID of the model that generated the response.
+</ParamField>
+
+<ParamField path="responseTimeMs" type="number" required>
+  Time taken to generate the response in milliseconds.
+</ParamField>
+
+**Updates:**
+- Increments `totalMessages` by 1
+- Increments `totalAssistantMessages` by 1
+- Updates global `avgResponseTimeMs` using running average
+- Updates model-specific `avgResponseTimeMs` in `perModel`
+- Increments model's `messages` count in `perModel`
+- Updates `lastUpdated` timestamp
+
+**Example:**
+```typescript
+const { recordAssistantResponse } = useUsageStats();
+
+const startTime = performance.now();
+// ... AI response generation ...
+const responseTime = performance.now() - startTime;
+
+recordAssistantResponse('openai/gpt-4-turbo', responseTime);
+```
+
+### recordNewConversation
+
+Records the start of a new conversation.
+
+```typescript
+recordNewConversation(modelId: string): void
+```
+
+<ParamField path="modelId" type="string" required>
+  ID of the model used for the conversation.
+</ParamField>
+
+**Updates:**
+- Increments `totalConversations` by 1
+- Increments model's `conversations` count in `perModel`
+- Updates `lastUpdated` timestamp
+
+**Example:**
+```typescript
+const { recordNewConversation } = useUsageStats();
+
+// User starts new conversation
+recordNewConversation('anthropic/claude-3.5-sonnet');
+```
+
+### resetStats
+
+Resets all statistics to default values.
+
+```typescript
+resetStats(): void
+```
+
+**Example:**
+```typescript
+const { resetStats } = useUsageStats();
+
+const handleReset = () => {
+  if (confirm('Reset all usage statistics?')) {
+    resetStats();
+  }
+};
+```
+
+## Types
+
+### UsageStats
+
+```typescript
+interface UsageStats {
+  totalConversations: number;
+  totalMessages: number;
+  totalUserMessages: number;
+  totalAssistantMessages: number;
+  avgResponseTimeMs: number;
+  perModel: Record<string, ModelStats>;
+  lastUpdated: string; // ISO date string
+}
+```
+
+### ModelStats
+
+```typescript
+interface ModelStats {
+  conversations: number;
+  messages: number;
+  avgResponseTimeMs: number;
+}
+```
+
+## Default Values
+
+```typescript
+const DEFAULT_STATS: UsageStats = {
+  totalConversations: 0,
+  totalMessages: 0,
+  totalUserMessages: 0,
+  totalAssistantMessages: 0,
+  avgResponseTimeMs: 0,
+  perModel: {},
+  lastUpdated: new Date().toISOString(),
+};
+```
+
+## Response Time Calculation
+
+Response times are calculated using a running average to avoid storing all individual times:
+
+### Model-Specific Average
+
+```typescript
+const newModelAvg = model.messages > 0
+  ? Math.round(
+      (model.avgResponseTimeMs * Math.max(model.messages - 1, 0) + responseTimeMs) /
+      model.messages
+    )
+  : responseTimeMs;
+```
+
+### Global Average
+
+```typescript
+const newGlobalAvg = state.totalAssistantMessages > 0
+  ? Math.round(
+      (state.avgResponseTimeMs * state.totalAssistantMessages + responseTimeMs) /
+      newTotalAssistant
+    )
+  : responseTimeMs;
+```
+
+## Persistence
+
+Statistics are automatically persisted to localStorage:
+
+```typescript
+persist(
+  (set, get) => ({ /* store */ }),
+  { name: 'polychat-usage-stats' }
+)
+```
+
+**Storage key:** `polychat-usage-stats`
+
+## Example: Usage Dashboard
+
+```typescript
+import { useUsageStats } from '@/hooks/useUsageStats';
+
+function UsageDashboard() {
+  const {
+    totalConversations,
+    totalMessages,
+    totalUserMessages,
+    totalAssistantMessages,
+    avgResponseTimeMs,
+    perModel,
+    lastUpdated,
+    resetStats,
+  } = useUsageStats();
+
+  return (
+    <div>
+      <h2>Usage Statistics</h2>
+      <p>Last updated: {new Date(lastUpdated).toLocaleString()}</p>
+
+      <div className="stats">
+        <div>
+          <h3>Total Conversations</h3>
+          <p>{totalConversations}</p>
+        </div>
+        <div>
+          <h3>Total Messages</h3>
+          <p>{totalMessages}</p>
+        </div>
+        <div>
+          <h3>User Messages</h3>
+          <p>{totalUserMessages}</p>
+        </div>
+        <div>
+          <h3>Assistant Messages</h3>
+          <p>{totalAssistantMessages}</p>
+        </div>
+        <div>
+          <h3>Avg Response Time</h3>
+          <p>{avgResponseTimeMs.toFixed(0)}ms</p>
+        </div>
+      </div>
+
+      <h3>Per Model</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Model</th>
+            <th>Conversations</th>
+            <th>Messages</th>
+            <th>Avg Response Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          {Object.entries(perModel).map(([modelId, stats]) => (
+            <tr key={modelId}>
+              <td>{modelId}</td>
+              <td>{stats.conversations}</td>
+              <td>{stats.messages}</td>
+              <td>{stats.avgResponseTimeMs.toFixed(0)}ms</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <button onClick={resetStats}>Reset Statistics</button>
+    </div>
+  );
+}
+```
+
+## Example: Model Comparison
+
+```typescript
+import { useUsageStats } from '@/hooks/useUsageStats';
+
+function ModelComparison() {
+  const { perModel } = useUsageStats();
+
+  const models = Object.entries(perModel)
+    .map(([id, stats]) => ({ id, ...stats }))
+    .sort((a, b) => b.messages - a.messages); // Sort by usage
+
+  const fastest = models.reduce((prev, curr) =>
+    curr.avgResponseTimeMs < prev.avgResponseTimeMs ? curr : prev
+  );
+
+  return (
+    <div>
+      <h2>Model Comparison</h2>
+      
+      <div>
+        <h3>Most Used</h3>
+        <p>{models[0]?.id}</p>
+        <p>{models[0]?.messages} messages</p>
+      </div>
+
+      <div>
+        <h3>Fastest</h3>
+        <p>{fastest.id}</p>
+        <p>{fastest.avgResponseTimeMs.toFixed(0)}ms avg</p>
+      </div>
+
+      <div>
+        <h3>All Models</h3>
+        {models.map((model) => (
+          <div key={model.id}>
+            <strong>{model.id}</strong>
+            <div>
+              {model.messages} messages | {model.conversations} conversations
+            </div>
+            <div>Avg: {model.avgResponseTimeMs.toFixed(0)}ms</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+```
+
+## Example: Integration with Chat
+
+```typescript
+import { useChat } from '@/hooks/useChat';
+import { useUsageStats } from '@/hooks/useUsageStats';
+
+function ChatWithStats() {
+  const { sendMessageToAll, selectedModels } = useChat();
+  const { recordUserMessage, recordAssistantResponse } = useUsageStats();
+
+  const handleSendMessage = async (content: string) => {
+    // Record user message
+    recordUserMessage(selectedModels);
+
+    const startTime = performance.now();
+    await sendMessageToAll(content);
+    const responseTime = performance.now() - startTime;
+
+    // Record assistant responses
+    selectedModels.forEach((modelId) => {
+      recordAssistantResponse(modelId, responseTime / selectedModels.length);
+    });
+  };
+
+  return (
+    <div>
+      {/* Chat UI */}
+    </div>
+  );
+}
+```
+
+## Notes
+
+- All statistics are persisted automatically via Zustand middleware
+- Response times use running averages to save memory
+- Calling `recordUserMessage` with multiple model IDs increments total messages by the array length
+- Per-model stats are initialized on first use (lazy initialization)
+- ISO timestamps ensure consistent date formatting across locales

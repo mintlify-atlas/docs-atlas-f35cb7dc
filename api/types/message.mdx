@@ -1,0 +1,163 @@
+---
+title: 'Message Types'
+description: 'Message, MessageContent, and GeneratedImage interfaces for chat messages'
+---
+
+## Message
+
+Represents a single chat message in a conversation.
+
+<ResponseField name="id" type="string" required>
+  Unique identifier for the message
+</ResponseField>
+
+<ResponseField name="role" type="'user' | 'assistant' | 'system'" required>
+  The role of the message sender:
+  - `user`: Message from the user
+  - `assistant`: Message from the AI assistant
+  - `system`: System-level instruction or prompt
+</ResponseField>
+
+<ResponseField name="content" type="string | MessageContent[]" required>
+  The message content. Can be:
+  - A simple string for text-only messages
+  - An array of `MessageContent` objects for multimodal messages (text + images)
+</ResponseField>
+
+<ResponseField name="timestamp" type="Date" required>
+  When the message was created
+</ResponseField>
+
+<ResponseField name="modelId" type="string">
+  Identifier of the model that generated this message (for assistant messages)
+</ResponseField>
+
+<ResponseField name="streaming" type="boolean">
+  Indicates if the message is currently being streamed
+</ResponseField>
+
+<ResponseField name="imageData" type="GeneratedImage">
+  Metadata for generated images contained in the message
+</ResponseField>
+
+### Example
+
+```typescript
+const message: Message = {
+  id: 'msg_123',
+  role: 'assistant',
+  content: 'Hello! How can I help you today?',
+  timestamp: new Date(),
+  modelId: 'gpt-4',
+  streaming: false
+};
+```
+
+---
+
+## MessageContent
+
+Represents individual content blocks within a multimodal message.
+
+<ResponseField name="type" type="'text' | 'image_url'" required>
+  The type of content:
+  - `text`: Text content
+  - `image_url`: Image reference
+</ResponseField>
+
+<ResponseField name="text" type="string">
+  The text content (when `type` is `'text'`)
+</ResponseField>
+
+<ResponseField name="image_url" type="object">
+  Image URL configuration (when `type` is `'image_url'`)
+  
+  <Expandable title="properties">
+    <ResponseField name="url" type="string" required>
+      The URL of the image
+    </ResponseField>
+    
+    <ResponseField name="detail" type="'low' | 'high' | 'auto'">
+      The level of detail for image processing:
+      - `low`: Low resolution, faster processing
+      - `high`: High resolution, more detailed analysis
+      - `auto`: Automatically determine appropriate detail level
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+### Example
+
+```typescript
+const multimodalMessage: Message = {
+  id: 'msg_456',
+  role: 'user',
+  content: [
+    {
+      type: 'text',
+      text: 'What is in this image?'
+    },
+    {
+      type: 'image_url',
+      image_url: {
+        url: 'https://example.com/image.jpg',
+        detail: 'high'
+      }
+    }
+  ],
+  timestamp: new Date()
+};
+```
+
+---
+
+## GeneratedImage
+
+Metadata for AI-generated images.
+
+<ResponseField name="url" type="string" required>
+  URL of the generated image
+</ResponseField>
+
+<ResponseField name="width" type="number" required>
+  Image width in pixels
+</ResponseField>
+
+<ResponseField name="height" type="number" required>
+  Image height in pixels
+</ResponseField>
+
+<ResponseField name="format" type="string" required>
+  Image format (e.g., 'png', 'jpg', 'webp')
+</ResponseField>
+
+<ResponseField name="size" type="number" required>
+  File size in bytes
+</ResponseField>
+
+<ResponseField name="prompt" type="string" required>
+  The prompt used to generate the image
+</ResponseField>
+
+<ResponseField name="model" type="string" required>
+  The model used to generate the image
+</ResponseField>
+
+<ResponseField name="timestamp" type="Date" required>
+  When the image was generated
+</ResponseField>
+
+### Example
+
+```typescript
+const imageData: GeneratedImage = {
+  url: 'https://cdn.example.com/generated/abc123.png',
+  width: 1024,
+  height: 1024,
+  format: 'png',
+  size: 2048576,
+  prompt: 'A serene mountain landscape at sunset',
+  model: 'dall-e-3',
+  timestamp: new Date()
+};
+```

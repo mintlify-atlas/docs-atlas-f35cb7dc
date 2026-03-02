@@ -1,0 +1,249 @@
+---
+title: RAG Service
+description: Retrieval-Augmented Generation using semantic embeddings and similarity search
+---
+
+The RAG (Retrieval-Augmented Generation) service provides semantic search capabilities using transformer-based embeddings to find relevant context from conversation history.
+
+## Overview
+
+The service uses the `Xenova/all-MiniLM-L6-v2` model for generating embeddings and performs cosine similarity calculations to retrieve the most relevant messages from chat history.
+
+## Core Function
+
+### getRelevantContext
+
+Retrieves the most semantically relevant messages from conversation history based on a query.
+
+```typescript
+getRelevantContext(
+  query: string,
+  history: Message[],
+  maxMessages?: number
+): Promise<Message[]>
+```
+
+<ParamField path="query" type="string" required>
+  The user query or current message to find relevant context for
+</ParamField>
+
+<ParamField path="history" type="Message[]" required>
+  Array of previous conversation messages to search through
+</ParamField>
+
+<ParamField path="maxMessages" type="number" default="5">
+  Maximum number of relevant messages to return
+</ParamField>
+
+<ResponseField name="relevantMessages" type="Message[]">
+  Array of most relevant messages, sorted chronologically
+</ResponseField>
+
+**Example:**
+
+```typescript
+import { getRelevantContext } from './services/ragService';
+
+const history = [
+  {
+    id: '1',
+    role: 'user',
+    content: 'What is machine learning?',
+    timestamp: new Date('2024-01-01')
+  },
+  {
+    id: '2',
+    role: 'assistant',
+    content: 'Machine learning is a subset of AI...',
+    timestamp: new Date('2024-01-01')
+  },
+  // ... more messages
+];
+
+const relevantMsgs = await getRelevantContext(
+  'How does neural network training work?',
+  history,
+  3
+);
+
+console.log(relevantMsgs);
+// Returns top 3 most relevant messages about ML/training
+```
+
+## How It Works
+
+### 1. Embedding Generation
+
+The service generates embeddings using a singleton pattern to ensure the model is loaded only once:
+
+```typescript
+// Internal implementation
+class EmbeddingService {
+  private static instance: FeatureExtractionPipeline | null = null;
+
+  static async getInstance() {
+    if (this.instance === null) {
+      this.instance = await pipeline(
+        'feature-extraction',
+        'Xenova/all-MiniLM-L6-v2'
+      );
+    }
+    return this.instance;
+  }
+}
+```
+
+### 2. Semantic Similarity
+
+Embeddings are compared using cosine similarity to find the most relevant messages:
+
+1. Query is converted to an embedding vector
+2. All history messages are converted to embeddings
+3. Cosine similarity is calculated between query and each message
+4. Top N messages with highest similarity scores are selected
+5. Results are sorted chronologically for natural conversation flow
+
+### 3. Performance Optimization
+
+- **Singleton pattern**: Model loaded once and reused
+- **Batch processing**: Embeddings generated in parallel
+- **Mean pooling**: Efficient vector representation
+- **Normalized embeddings**: Optimized similarity calculations
+
+## Internal Functions
+
+### getEmbeddings (Internal)
+
+Generates embeddings for a batch of text inputs.
+
+```typescript
+async function getEmbeddings(texts: string[]): Promise<number[][]>
+```
+
+This function:
+- Takes an array of text strings
+- Generates embeddings using the MiniLM model
+- Uses mean pooling for aggregation
+- Normalizes vectors for consistent similarity scores
+- Returns array of embedding vectors
+
+**Example workflow:**
+
+```typescript
+// Input texts
+const texts = [
+  'What is TypeScript?',
+  'user: Explain React hooks',
+  'assistant: React hooks are functions...'
+];
+
+// Generated embeddings (simplified)
+const embeddings = await getEmbeddings(texts);
+// Returns: [[0.1, 0.2, ...], [0.3, 0.1, ...], ...]
+// Each embedding is a 384-dimensional vector
+```
+
+## Use Cases
+
+### 1. Context-Aware Responses
+
+```typescript
+const userQuery = 'Can you elaborate on that?';
+const context = await getRelevantContext(userQuery, conversationHistory, 3);
+
+// Send context + query to AI model
+const messagesWithContext = [...context, { role: 'user', content: userQuery }];
+const response = await fetchAIResponse(messagesWithContext, apiKey, model);
+```
+
+### 2. Long Conversation Management
+
+```typescript
+// For long conversations, retrieve only relevant parts
+if (conversationHistory.length > 50) {
+  const relevantContext = await getRelevantContext(
+    currentQuery,
+    conversationHistory,
+    10 // Get top 10 relevant messages
+  );
+  
+  // Use only relevant context instead of full history
+  const response = await streamAIResponse(
+    relevantContext,
+    apiKey,
+    model,
+    onChunk
+  );
+}
+```
+
+### 3. Finding Related Topics
+
+```typescript
+// Find all messages related to a specific topic
+const topicQuery = 'database optimization techniques';
+const relatedMessages = await getRelevantContext(
+  topicQuery,
+  allMessages,
+  20
+);
+
+// Display related discussion points
+console.log('Related discussions:', relatedMessages);
+```
+
+## Type Definitions
+
+### Message
+
+```typescript
+interface Message {
+  id: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string | MessageContent[];
+  timestamp: Date;
+}
+```
+
+**Note:** When `content` is `MessageContent[]`, the RAG service extracts only text content for embedding generation.
+
+## Model Information
+
+### Xenova/all-MiniLM-L6-v2
+
+- **Type**: Sentence transformer model
+- **Embedding dimension**: 384
+- **Use case**: Semantic similarity and search
+- **Performance**: Fast, lightweight, browser-compatible
+- **Library**: @xenova/transformers (Transformers.js)
+
+## Best Practices
+
+1. **Limit maxMessages**: Keep between 3-10 for optimal context window
+2. **Filter history**: Remove system messages or metadata before searching
+3. **Cache embeddings**: Consider caching embeddings for frequently accessed messages
+4. **Handle empty history**: Check if history is empty before calling
+
+```typescript
+if (history.length === 0) {
+  // No context available
+  return [];
+}
+
+const context = await getRelevantContext(query, history, 5);
+```
+
+## Error Handling
+
+The service handles errors gracefully:
+
+```typescript
+try {
+  const context = await getRelevantContext(query, history);
+  // Use context
+} catch (error) {
+  console.error('RAG service error:', error);
+  // Fall back to recent messages or full history
+  const fallback = history.slice(-5);
+}
+```

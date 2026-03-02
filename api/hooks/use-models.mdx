@@ -1,0 +1,340 @@
+---
+title: 'useModels'
+description: 'Hook for fetching, filtering, and managing AI models from OpenRouter'
+icon: 'robot'
+---
+
+## Overview
+
+The `useModels` hook fetches available AI models from the OpenRouter API and provides filtering capabilities. It handles model pagination, search, and filtering by provider, context length, and price range.
+
+## Import
+
+```typescript
+import { useModels } from '@/hooks/useModels';
+```
+
+## Usage
+
+```typescript
+const {
+  models,
+  allModels,
+  loading,
+  error,
+  filters,
+  availableProviders,
+  updateFilters,
+  refreshModels,
+} = useModels();
+```
+
+## Return Values
+
+<ResponseField name="models" type="OpenRouterModel[]">
+  Filtered array of available models based on current filters. This is the primary array to use for displaying models.
+</ResponseField>
+
+<ResponseField name="allModels" type="OpenRouterModel[]">
+  Unfiltered array of all available models. Useful for statistics or when you need the complete list.
+</ResponseField>
+
+<ResponseField name="loading" type="boolean">
+  True while models are being fetched from the API.
+</ResponseField>
+
+<ResponseField name="error" type="string | null">
+  Error message if model fetching failed, null otherwise.
+</ResponseField>
+
+<ResponseField name="filters" type="ModelFilters">
+  Current filter state including searchTerm, provider, contextLength, and priceRange.
+</ResponseField>
+
+<ResponseField name="availableProviders" type="string[]">
+  Sorted array of unique provider names extracted from available models (e.g., ['anthropic', 'openai', 'google']).
+</ResponseField>
+
+<ResponseField name="updateFilters" type="(newFilters: Partial<ModelFilters>) => void">
+  Function to update filter state. Merges new filters with existing ones.
+</ResponseField>
+
+<ResponseField name="refreshModels" type="() => Promise<void>">
+  Function to manually refresh the models list from the API.
+</ResponseField>
+
+## Methods
+
+### updateFilters
+
+Updates the current filter state.
+
+```typescript
+updateFilters(newFilters: Partial<ModelFilters>): void
+```
+
+<ParamField path="newFilters" type="Partial<ModelFilters>" required>
+  Object containing filter properties to update. Only provided properties are updated.
+</ParamField>
+
+**Example:**
+```typescript
+const { updateFilters } = useModels();
+
+// Search for models
+updateFilters({ searchTerm: 'claude' });
+
+// Filter by provider
+updateFilters({ provider: 'anthropic' });
+
+// Filter by context length
+updateFilters({ contextLength: 'long' });
+
+// Filter by price range
+updateFilters({ priceRange: 'free' });
+
+// Combine multiple filters
+updateFilters({
+  provider: 'openai',
+  contextLength: 'medium',
+  priceRange: 'medium',
+});
+```
+
+### refreshModels
+
+Manually refreshes the models list from the OpenRouter API.
+
+```typescript
+await refreshModels(): Promise<void>
+```
+
+**Example:**
+```typescript
+const { refreshModels, loading } = useModels();
+
+const handleRefresh = async () => {
+  await refreshModels();
+  console.log('Models refreshed!');
+};
+```
+
+## Types
+
+### ModelFilters
+
+```typescript
+interface ModelFilters {
+  searchTerm: string;
+  provider: string | 'all';
+  contextLength: 'all' | 'short' | 'medium' | 'long';
+  priceRange: 'all' | 'free' | 'low' | 'medium' | 'high';
+}
+```
+
+<ParamField path="searchTerm" type="string">
+  Text to search in model ID, name, and description.
+</ParamField>
+
+<ParamField path="provider" type="string | 'all'">
+  Provider to filter by (e.g., 'anthropic', 'openai') or 'all' for no filtering.
+</ParamField>
+
+<ParamField path="contextLength" type="'all' | 'short' | 'medium' | 'long'">
+  - `short`: ≤ 8,192 tokens
+  - `medium`: 8,193 - 32,768 tokens
+  - `long`: > 32,768 tokens
+  - `all`: No filtering
+</ParamField>
+
+<ParamField path="priceRange" type="'all' | 'free' | 'low' | 'medium' | 'high'">
+  Price category determined by the `getPriceCategory()` function. Based on model pricing from OpenRouter.
+</ParamField>
+
+### OpenRouterModel
+
+```typescript
+interface OpenRouterModel {
+  id: string;
+  name?: string;
+  description?: string;
+  context_length?: number;
+  pricing?: {
+    prompt: string;
+    completion: string;
+  };
+  top_provider?: {
+    context_length: number;
+    max_completion_tokens: number;
+  };
+  architecture?: {
+    modality: string;
+    tokenizer: string;
+    instruct_type?: string;
+  };
+}
+```
+
+## Filtering Logic
+
+### Search Term Filtering
+
+Searches across multiple model properties (case-insensitive):
+
+```typescript
+model.id.toLowerCase().includes(searchTerm) ||
+model.name?.toLowerCase().includes(searchTerm) ||
+model.description?.toLowerCase().includes(searchTerm)
+```
+
+### Provider Filtering
+
+Extracts provider from model ID:
+
+```typescript
+const provider = model.id.split('/')[0]; // e.g., 'anthropic' from 'anthropic/claude-3.5-sonnet'
+```
+
+### Context Length Filtering
+
+```typescript
+switch (contextLength) {
+  case 'short':
+    return contextLength <= 8192;
+  case 'medium':
+    return contextLength > 8192 && contextLength <= 32768;
+  case 'long':
+    return contextLength > 32768;
+}
+```
+
+### Price Range Filtering
+
+Uses the `getPriceCategory()` function from the models API service to categorize models.
+
+## Data Loading
+
+The hook attempts to load all models using pagination, with fallback:
+
+```typescript
+try {
+  allModels = await fetchAllAvailableModels(); // Paginated fetch
+} catch {
+  allModels = await fetchAvailableModels(); // Single page fallback
+}
+```
+
+If both fail, returns an empty array with an error message.
+
+## Example: Model Selector with Filters
+
+```typescript
+import { useModels } from '@/hooks/useModels';
+
+function ModelSelector() {
+  const {
+    models,
+    loading,
+    error,
+    filters,
+    availableProviders,
+    updateFilters,
+    refreshModels,
+  } = useModels();
+
+  if (loading) return <div>Loading models...</div>;
+  if (error) return <div>Error: {error}</div>;
+
+  return (
+    <div>
+      <input
+        type="text"
+        placeholder="Search models..."
+        value={filters.searchTerm}
+        onChange={(e) => updateFilters({ searchTerm: e.target.value })}
+      />
+
+      <select
+        value={filters.provider}
+        onChange={(e) => updateFilters({ provider: e.target.value })}
+      >
+        <option value="all">All Providers</option>
+        {availableProviders.map((provider) => (
+          <option key={provider} value={provider}>
+            {provider}
+          </option>
+        ))}
+      </select>
+
+      <select
+        value={filters.contextLength}
+        onChange={(e) => updateFilters({ contextLength: e.target.value })}
+      >
+        <option value="all">All Context Lengths</option>
+        <option value="short">Short (≤8K)</option>
+        <option value="medium">Medium (8K-32K)</option>
+        <option value="long">Long (>32K)</option>
+      </select>
+
+      <select
+        value={filters.priceRange}
+        onChange={(e) => updateFilters({ priceRange: e.target.value })}
+      >
+        <option value="all">All Prices</option>
+        <option value="free">Free</option>
+        <option value="low">Low</option>
+        <option value="medium">Medium</option>
+        <option value="high">High</option>
+      </select>
+
+      <button onClick={refreshModels}>Refresh Models</button>
+
+      <div>
+        <p>Found {models.length} models</p>
+        {models.map((model) => (
+          <div key={model.id}>
+            <h3>{model.name || model.id}</h3>
+            <p>{model.description}</p>
+            <p>Context: {model.context_length?.toLocaleString()} tokens</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+```
+
+## Example: Provider Statistics
+
+```typescript
+import { useModels } from '@/hooks/useModels';
+
+function ProviderStats() {
+  const { allModels, availableProviders } = useModels();
+
+  const stats = availableProviders.map((provider) => ({
+    name: provider,
+    count: allModels.filter((m) => m.id.startsWith(provider + '/')).length,
+  }));
+
+  return (
+    <div>
+      <h2>Models by Provider</h2>
+      {stats.map((stat) => (
+        <div key={stat.name}>
+          {stat.name}: {stat.count} models
+        </div>
+      ))}
+    </div>
+  );
+}
+```
+
+## Notes
+
+- Models are fetched once on mount and cached in state
+- Use `refreshModels()` to manually update the list
+- Filtering is computed via `useMemo` for performance
+- All filtering is client-side
+- Empty model list with error message if API fetch fails
+- Provider names are extracted from model IDs (format: `provider/model-name`)

@@ -1,0 +1,448 @@
+---
+title: OpenRouter Service
+description: OpenRouter API integration for AI chat, streaming, and image generation
+---
+
+The OpenRouter service provides functions for interacting with OpenRouter's API for chat completions, streaming responses, and AI image generation.
+
+## Core Functions
+
+### fetchAIResponse
+
+Fetches an AI response from OpenRouter API with support for text and image outputs.
+
+```typescript
+fetchAIResponse(
+  messages: Message[],
+  apiKey: string,
+  model: string,
+  systemPrompt?: string
+): Promise<string | MessageContent[]>
+```
+
+<ParamField path="messages" type="Message[]" required>
+  Array of conversation messages with role and content
+</ParamField>
+
+<ParamField path="apiKey" type="string" required>
+  OpenRouter API key for authentication
+</ParamField>
+
+<ParamField path="model" type="string" required>
+  Model ID (e.g., 'openai/gpt-4o', 'anthropic/claude-4.5-sonnet')
+</ParamField>
+
+<ParamField path="systemPrompt" type="string">
+  Optional system prompt to guide model behavior
+</ParamField>
+
+<ResponseField name="response" type="string | MessageContent[]">
+  Returns string for text-only responses, or MessageContent array when response includes images
+</ResponseField>
+
+**Example:**
+
+```typescript
+const messages = [
+  {
+    id: '1',
+    role: 'user',
+    content: 'Explain quantum computing',
+    timestamp: new Date()
+  }
+];
+
+const response = await fetchAIResponse(
+  messages,
+  'sk-or-v1-xxx',
+  'openai/gpt-4o',
+  'You are a helpful assistant.'
+);
+```
+
+---
+
+### streamAIResponse
+
+Streams AI responses in real-time with support for abort signals.
+
+```typescript
+streamAIResponse(
+  messages: Message[],
+  apiKey: string,
+  model: string,
+  onChunk: (delta: string) => void,
+  systemPrompt?: string,
+  abortController?: AbortController
+): Promise<string | MessageContent[]>
+```
+
+<ParamField path="messages" type="Message[]" required>
+  Array of conversation messages
+</ParamField>
+
+<ParamField path="apiKey" type="string" required>
+  OpenRouter API key
+</ParamField>
+
+<ParamField path="model" type="string" required>
+  Model ID to use for generation
+</ParamField>
+
+<ParamField path="onChunk" type="(delta: string) => void" required>
+  Callback function invoked for each text chunk received
+</ParamField>
+
+<ParamField path="systemPrompt" type="string">
+  Optional system prompt
+</ParamField>
+
+<ParamField path="abortController" type="AbortController">
+  Optional controller to cancel the streaming request
+</ParamField>
+
+<ResponseField name="fullResponse" type="string | MessageContent[]">
+  Complete accumulated response after streaming completes
+</ResponseField>
+
+**Example:**
+
+```typescript
+const abortController = new AbortController();
+
+const fullText = await streamAIResponse(
+  messages,
+  apiKey,
+  'anthropic/claude-4.5-sonnet',
+  (chunk) => {
+    console.log('Received:', chunk);
+  },
+  'You are a helpful assistant.',
+  abortController
+);
+
+// To cancel: abortController.abort();
+```
+
+---
+
+## Image Generation
+
+### generateImage
+
+Generates images using AI models that support image generation.
+
+```typescript
+generateImage(
+  prompt: string,
+  apiKey: string,
+  model?: string,
+  options?: {
+    size?: '1024x1024' | '512x512' | '256x256';
+    style?: 'natural' | 'vivid' | 'digital_art';
+    quality?: 'standard' | 'hd';
+  }
+): Promise<string | MessageContent[]>
+```
+
+<ParamField path="prompt" type="string" required>
+  Description of the image to generate
+</ParamField>
+
+<ParamField path="apiKey" type="string" required>
+  OpenRouter API key
+</ParamField>
+
+<ParamField path="model" type="string" default="google/gemini-2.5-flash-image-preview:free">
+  Image generation model ID
+</ParamField>
+
+<ParamField path="options.size" type="string">
+  Image dimensions (1024x1024, 512x512, or 256x256)
+</ParamField>
+
+<ParamField path="options.style" type="string">
+  Visual style: natural, vivid, or digital_art
+</ParamField>
+
+<ParamField path="options.quality" type="string">
+  Output quality: standard or hd
+</ParamField>
+
+**Example:**
+
+```typescript
+const result = await generateImage(
+  'A futuristic city at sunset',
+  'sk-or-v1-xxx',
+  'google/gemini-2.5-flash-image-preview',
+  {
+    size: '1024x1024',
+    style: 'vivid',
+    quality: 'hd'
+  }
+);
+```
+
+---
+
+### generateImageReliable
+
+Robust image generation with automatic retries and fallback models.
+
+```typescript
+generateImageReliable(
+  prompt: string,
+  apiKey: string,
+  primaryModel?: string,
+  options?: {
+    maxRetries?: number;
+    fallbackModels?: string[];
+    size?: '1024x1024' | '512x512' | '256x256';
+    style?: 'natural' | 'vivid' | 'digital_art';
+    quality?: 'standard' | 'hd';
+  }
+): Promise<string | MessageContent[]>
+```
+
+<ParamField path="prompt" type="string" required>
+  Image description
+</ParamField>
+
+<ParamField path="apiKey" type="string" required>
+  OpenRouter API key
+</ParamField>
+
+<ParamField path="primaryModel" type="string">
+  Preferred model to try first
+</ParamField>
+
+<ParamField path="options.maxRetries" type="number" default="3">
+  Maximum retry attempts per model
+</ParamField>
+
+<ParamField path="options.fallbackModels" type="string[]">
+  Array of fallback model IDs to try if primary fails
+</ParamField>
+
+**Example:**
+
+```typescript
+const result = await generateImageReliable(
+  'Abstract digital artwork',
+  apiKey,
+  'google/gemini-2.5-flash-image-preview',
+  {
+    maxRetries: 3,
+    fallbackModels: [
+      'google/gemini-2.5-flash-image-preview:free',
+      'openai/gpt-4o'
+    ],
+    quality: 'hd'
+  }
+);
+```
+
+---
+
+## Model Discovery
+
+### getImageModels
+
+Retrieves available models that support image generation.
+
+```typescript
+getImageModels(): Promise<Array<{
+  id: string;
+  name: string;
+  desc: string;
+  emoji: string;
+}>>
+```
+
+**Example:**
+
+```typescript
+const imageModels = await getImageModels();
+// Returns:
+// [
+//   {
+//     id: 'google/gemini-2.5-flash-image-preview:free',
+//     name: 'Gemini 2.5 Flash Image',
+//     desc: "Génération d'images IA avancée",
+//     emoji: '🎨'
+//   },
+//   ...
+// ]
+```
+
+---
+
+### getTopWeeklyModels
+
+Fetches trending models for general chat use.
+
+```typescript
+getTopWeeklyModels(): Promise<Array<{
+  id: string;
+  name: string;
+  desc: string;
+  emoji: string;
+  isFree?: boolean;
+}>>
+```
+
+**Example:**
+
+```typescript
+const trendingModels = await getTopWeeklyModels();
+// Returns latest trending models like Minimax M2.5, Gemini 3 Flash, etc.
+```
+
+---
+
+## Utility Functions
+
+### validateApiKey
+
+Validates an OpenRouter API key.
+
+```typescript
+validateApiKey(apiKey: string): Promise<boolean>
+```
+
+<ParamField path="apiKey" type="string" required>
+  API key to validate
+</ParamField>
+
+<ResponseField name="isValid" type="boolean">
+  true if the API key is valid, false otherwise
+</ResponseField>
+
+**Example:**
+
+```typescript
+const isValid = await validateApiKey('sk-or-v1-xxx');
+if (!isValid) {
+  console.error('Invalid API key');
+}
+```
+
+---
+
+### isImageGenerationModel
+
+Checks if a model supports image generation.
+
+```typescript
+isImageGenerationModel(modelId: string): boolean
+```
+
+**Example:**
+
+```typescript
+const canGenerate = isImageGenerationModel('google/gemini-2.5-flash-image-preview');
+// Returns: true
+```
+
+---
+
+### optimizeImagePrompt
+
+Enhances image prompts with quality descriptors.
+
+```typescript
+optimizeImagePrompt(prompt: string): string
+```
+
+**Example:**
+
+```typescript
+const enhanced = optimizeImagePrompt('a cat');
+// Returns: 'a cat, highly detailed, professional quality, vibrant colors...'
+```
+
+---
+
+### createAdvancedImagePrompt
+
+Creates detailed image prompts with customizable parameters.
+
+```typescript
+createAdvancedImagePrompt(
+  basePrompt: string,
+  options?: {
+    style?: 'natural' | 'vivid' | 'digital_art' | 'photorealistic' | 'anime' | 'oil_painting' | 'watercolor';
+    mood?: 'bright' | 'dark' | 'serene' | 'dramatic' | 'playful' | 'mysterious';
+    lighting?: 'natural' | 'studio' | 'dramatic' | 'soft' | 'neon' | 'golden_hour';
+    composition?: 'centered' | 'rule_of_thirds' | 'wide_angle' | 'close_up' | 'birds_eye';
+    quality?: 'standard' | 'hd' | 'ultra_hd';
+  }
+): string
+```
+
+**Example:**
+
+```typescript
+const prompt = createAdvancedImagePrompt(
+  'mountain landscape',
+  {
+    style: 'photorealistic',
+    mood: 'serene',
+    lighting: 'golden_hour',
+    composition: 'rule_of_thirds',
+    quality: 'ultra_hd'
+  }
+);
+```
+
+---
+
+## Type Definitions
+
+### Message
+
+```typescript
+interface Message {
+  id: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string | MessageContent[];
+  timestamp: Date;
+}
+```
+
+### MessageContent
+
+```typescript
+type MessageContent = 
+  | { type: 'text'; text: string }
+  | { type: 'image_url'; image_url: { url: string } };
+```
+
+### OpenRouterModel
+
+```typescript
+interface OpenRouterModel {
+  id: string;
+  name: string;
+  created: number;
+  description?: string;
+  context_length: number;
+  architecture: {
+    modality: string;
+    tokenizer: string;
+    instruct_type?: string;
+  };
+  pricing: {
+    prompt: string;
+    completion: string;
+    image?: string;
+    request?: string;
+  };
+  top_provider: {
+    context_length: number;
+    max_completion_tokens?: number;
+    is_moderated: boolean;
+  };
+}
+```

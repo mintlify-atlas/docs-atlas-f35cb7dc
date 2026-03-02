@@ -1,0 +1,219 @@
+---
+title: "Usage Dashboard"
+description: "Track your AI model usage statistics, per-model metrics, and response times"
+icon: "chart-line"
+---
+
+## Overview
+
+The Usage Dashboard provides detailed analytics about your PolyChat-AI usage. Access it anytime by pressing `Ctrl+U` (or `Cmd+U` on Mac).
+
+<Info>
+  All usage statistics are stored locally in your browser and never sent to external servers.
+</Info>
+
+## Accessing the Dashboard
+
+There are two ways to open the Usage Dashboard:
+
+1. **Keyboard shortcut**: Press `Ctrl+U` (Windows/Linux) or `Cmd+U` (Mac)
+2. **Menu**: Navigate through the application menu to find the Usage Dashboard option
+
+## Metrics Tracked
+
+The dashboard tracks comprehensive statistics about your AI interactions:
+
+### Global Statistics
+
+These metrics provide an overview of your total usage across all models:
+
+<CardGroup cols={3}>
+  <Card title="Total Conversations" icon="comments">
+    Number of unique conversations started
+  </Card>
+  <Card title="Total Messages" icon="message">
+    Combined count of all messages (user + assistant)
+  </Card>
+  <Card title="Average Response Time" icon="clock">
+    Mean response time in milliseconds across all models
+  </Card>
+</CardGroup>
+
+#### Detailed Message Counts
+
+- **Total User Messages**: Count of messages you've sent
+- **Total Assistant Messages**: Count of AI-generated responses
+- **Total Messages**: Sum of user and assistant messages
+
+<Note>
+  The total messages metric counts each message sent to multiple models separately. For example, sending one message to 3 models counts as 3 messages.
+</Note>
+
+### Per-Model Statistics
+
+For each AI model you've used, the dashboard displays:
+
+| Metric | Description | Location in Code |
+|--------|-------------|------------------|
+| **Conversations** | Number of conversations using this model | `perModel[modelId].conversations` |
+| **Messages** | Total messages exchanged with this model | `perModel[modelId].messages` |
+| **Avg Response Time** | Average time (ms) for this model to respond | `perModel[modelId].avgResponseTimeMs` |
+
+<Accordion title="Example per-model display">
+```
+google/gemini-3-flash
+  12 conversations • 156 messages • 847 ms
+
+anthropic/claude-4.5-sonnet
+  8 conversations • 94 messages • 1203 ms
+
+openai/gpt-5.2
+  5 conversations • 67 messages • 1456 ms
+```
+</Accordion>
+
+## Data Structure
+
+The usage statistics are managed by the `useUsageStats` hook located in `src/hooks/useUsageStats.ts:22`. The data structure follows this TypeScript interface:
+
+```typescript
+interface UsageStats {
+  totalConversations: number;
+  totalMessages: number;
+  totalUserMessages: number;
+  totalAssistantMessages: number;
+  avgResponseTimeMs: number;
+  perModel: Record<string, ModelStats>;
+  lastUpdated: string; // ISO date string
+}
+
+interface ModelStats {
+  conversations: number;
+  messages: number;
+  avgResponseTimeMs: number;
+}
+```
+
+## How Metrics Are Calculated
+
+### Response Time Averaging
+
+Response times use a **rolling average** algorithm to maintain accuracy:
+
+<Steps>
+  <Step title="Record Response">
+    When an assistant message is received, the response time is measured in milliseconds
+  </Step>
+  <Step title="Calculate Model Average">
+    The model's average is updated using the formula:
+    ```
+    newAvg = (oldAvg × (messageCount - 1) + newResponseTime) / messageCount
+    ```
+    See `src/hooks/useUsageStats.ts:48-54`
+  </Step>
+  <Step title="Update Global Average">
+    The global average is recalculated across all assistant messages:
+    ```
+    globalAvg = (oldGlobalAvg × oldCount + newResponseTime) / newCount
+    ```
+    See `src/hooks/useUsageStats.ts:57-63`
+  </Step>
+</Steps>
+
+### Message Counting
+
+Messages are tracked through three key functions:
+
+<CodeGroup>
+```typescript recordUserMessage
+// Called when you send a message
+recordUserMessage(modelIds: string[])
+// Updates totalUserMessages (+1)
+// Updates totalMessages (+modelIds.length)
+// Updates perModel messages for each model
+```
+
+```typescript recordAssistantResponse
+// Called when AI responds
+recordAssistantResponse(modelId: string, responseTimeMs: number)
+// Updates totalAssistantMessages (+1)
+// Updates totalMessages (+1)
+// Updates response time averages
+```
+
+```typescript recordNewConversation
+// Called when starting a new conversation
+recordNewConversation(modelId: string)
+// Updates totalConversations (+1)
+// Updates perModel conversations
+```
+</CodeGroup>
+
+## Data Persistence
+
+Usage statistics are automatically saved to browser localStorage using Zustand's persist middleware:
+
+- **Storage key**: `polychat-usage-stats`
+- **Update frequency**: Real-time (after every tracked event)
+- **Data retention**: Persists until you clear browser data or reset stats
+
+<Warning>
+  Clearing your browser's localStorage will erase all usage statistics. This action cannot be undone.
+</Warning>
+
+## Resetting Statistics
+
+To reset all usage statistics:
+
+1. Open the Usage Dashboard (`Ctrl+U`)
+2. Look for the "Reset Statistics" button
+3. Confirm the reset action
+
+This calls the `resetStats()` function which restores all metrics to their default values (zeros) while updating the `lastUpdated` timestamp.
+
+## Use Cases
+
+<AccordionGroup>
+  <Accordion title="Track API Costs">
+    Monitor which models you use most frequently to estimate API costs. Cross-reference message counts with the pricing information in Settings (`Ctrl+,`).
+  </Accordion>
+  
+  <Accordion title="Compare Model Performance">
+    Compare average response times across models to find the fastest options for your use case.
+  </Accordion>
+  
+  <Accordion title="Monitor Usage Patterns">
+    Review conversation counts to understand your daily/weekly usage patterns and optimize your workflow.
+  </Accordion>
+  
+  <Accordion title="Optimize Model Selection">
+    Identify which models you rely on most and consider whether they're the best fit for your common tasks.
+  </Accordion>
+</AccordionGroup>
+
+## Privacy & Security
+
+<Check>
+  All statistics are stored **locally** in your browser's localStorage
+</Check>
+
+<Check>
+  No usage data is sent to PolyChat servers or third parties
+</Check>
+
+<Check>
+  Statistics only include metadata (counts, times) - not message content
+</Check>
+
+<Check>
+  You can reset or clear all statistics at any time
+</Check>
+
+## Last Updated Timestamp
+
+The `lastUpdated` field shows when statistics were last modified. This ISO 8601 timestamp updates automatically whenever:
+- A message is sent or received
+- A new conversation is started
+- Statistics are reset
+
+You can use this to verify that tracking is working correctly.

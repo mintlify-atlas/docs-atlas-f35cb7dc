@@ -1,80 +1,223 @@
 ---
 title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+description: "Get from zero to your first AI chat conversation in under 5 minutes"
 ---
 
-## Get started in three steps
+## Try Online (Fastest)
 
-Get your documentation site running locally and make your first customization.
+The fastest way to experience PolyChat-AI is through our live demo. No installation required.
 
-### Step 1: Set up your local environment
-
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 2: Deploy your changes
-
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
-
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
-
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 3: Go live
-
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
-
-## Next steps
-
-Now that you have your docs running, explore these key features:
-
-<CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
+<Card
+  title="Launch Live Demo"
+  icon="rocket"
+  href="https://polychat-ai-xi.vercel.app"
+  horizontal
+>
+  Open PolyChat-AI in your browser and start chatting immediately
 </Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
-</CardGroup>
 
 <Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
+  You'll need an OpenRouter API key to use PolyChat-AI. See Step 2 below for instructions on obtaining one for free.
 </Note>
+
+## Get Started in 3 Steps
+
+<Steps>
+  <Step title="Open PolyChat-AI">
+    Visit the [live demo](https://polychat-ai-xi.vercel.app) or run locally:
+    
+    ```bash
+    git clone https://github.com/Teeflo/PolyChat-AI.git
+    cd PolyChat-AI
+    npm install
+    npm run dev
+    ```
+    
+    Then open `http://localhost:5173` in your browser.
+  </Step>
+
+  <Step title="Configure Your API Key">
+    On first launch, you'll see an onboarding modal. Here's how to get your free OpenRouter API key:
+
+    1. Visit [OpenRouter.ai](https://openrouter.ai/)
+    2. Sign up for a free account
+    3. Navigate to **Keys** in your dashboard
+    4. Click **Create Key** to generate your API key
+    5. Copy the key and paste it into the PolyChat-AI onboarding modal
+
+    <Tip>
+      OpenRouter offers a generous free tier to get started. Your API key is stored securely in your browser's localStorage and never sent anywhere except to OpenRouter.
+    </Tip>
+  </Step>
+
+  <Step title="Start Your First Conversation">
+    After entering your API key:
+
+    1. Select your preferred model (we recommend **GPT-4o** or **Claude 4 Sonnet** to start)
+    2. Click **New Conversation** or use the keyboard shortcut `Ctrl/Cmd + N`
+    3. Type your message in the chat input
+    4. Press **Enter** or click the send button
+    5. Watch as the AI responds in real-time with streaming text
+
+    <Info>
+      Your first message may take a few seconds as the model initializes. Subsequent messages will be faster.
+    </Info>
+  </Step>
+</Steps>
+
+## Your First Conversation
+
+Try this example to see PolyChat-AI in action:
+
+<CodeGroup>
+
+```text Example Prompt
+Explain how React hooks work with a simple example
+```
+
+```text Expected Response
+The AI will provide a detailed explanation of React hooks with code examples,
+formatted with syntax highlighting and proper markdown rendering.
+```
+
+</CodeGroup>
+
+## Explore Key Features
+
+Now that you have your first conversation running, explore these powerful features:
+
+<CardGroup cols={2}>
+  <Card
+    title="Try a Template"
+    icon="file-lines"
+    href="/features/templates"
+  >
+    Click the template icon in the chat input to explore 16+ pre-built conversation templates
+  </Card>
+
+  <Card
+    title="Use Quick Actions"
+    icon="bolt"
+    href="/features/quick-actions"
+  >
+    Select text and apply instant transformations like Explain, Optimize, or Debug
+  </Card>
+
+  <Card
+    title="Generate Images"
+    icon="image"
+    href="/features/image-generation"
+  >
+    Ask the AI to generate an image using prompts like "Generate an image of a sunset over mountains"
+  </Card>
+
+  <Card
+    title="Compare Models"
+    icon="grid-2"
+    href="/features/multi-model-chat"
+  >
+    Enable multi-model mode to compare responses from up to 3 AI models side-by-side
+  </Card>
+</CardGroup>
+
+## Common First Tasks
+
+### Switch Models
+
+You can change the AI model at any time:
+
+1. Click the model name in the header (e.g., "GPT-4o")
+2. Browse available models by provider or category
+3. Select a new model
+4. Continue your conversation with the new model
+
+<Tip>
+  Different models excel at different tasks. Try **GPT-4o** for general chat, **Claude 4 Sonnet** for coding, or **Gemini 2.5 Flash** for image generation.
+</Tip>
+
+### Save Conversations
+
+Your conversations are automatically saved to localStorage:
+
+- View conversation history in the left sidebar
+- Search through past conversations
+- Resume any conversation by clicking on it
+- Export conversations (keyboard shortcut: `Ctrl/Cmd + S`)
+
+### Customize Your Experience
+
+Access settings with `Ctrl/Cmd + K` or click the settings icon:
+
+- **Themes**: Choose from Dark, Light, Pixel Art, or Hacker themes
+- **Accent Colors**: Select from 8 color options
+- **System Instructions**: Add custom behavior instructions for the AI
+- **Conversation Tone**: Set the default tone (Neutral, Formal, Friendly, etc.)
+- **RAG Settings**: Enable or disable local context enhancement
+
+<Card
+  title="Customization Guide"
+  icon="palette"
+  href="/guides/customization"
+>
+  Learn more about customizing PolyChat-AI to match your preferences
+</Card>
+
+## Keyboard Shortcuts
+
+Boost your productivity with these shortcuts:
+
+| Shortcut       | Action               |
+| -------------- | -------------------- |
+| `Ctrl/Cmd + N` | New conversation     |
+| `Ctrl/Cmd + K` | Open settings        |
+| `Ctrl/Cmd + U` | Open usage dashboard |
+| `Ctrl/Cmd + S` | Save conversation    |
+| `Ctrl/Cmd + /` | Show help            |
+
+<Card
+  title="All Keyboard Shortcuts"
+  icon="keyboard"
+  href="/guides/keyboard-shortcuts"
+>
+  View the complete list of keyboard shortcuts
+</Card>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card
+    title="Installation Guide"
+    icon="download"
+    href="/installation"
+  >
+    Set up PolyChat-AI for local development with detailed instructions
+  </Card>
+
+  <Card
+    title="Configuration"
+    icon="gear"
+    href="/guides/configuration"
+  >
+    Learn about advanced configuration options
+  </Card>
+
+  <Card
+    title="Core Features"
+    icon="star"
+    href="/features/chat-interface"
+  >
+    Explore all the features PolyChat-AI has to offer
+  </Card>
+
+  <Card
+    title="Troubleshooting"
+    icon="wrench"
+    href="/advanced/troubleshooting"
+  >
+    Get help with common issues and errors
+  </Card>
+</CardGroup>
+
+<Warning>
+  **API Rate Limits**: Be aware that OpenRouter's free tier has rate limits. If you encounter rate limit errors, consider upgrading your OpenRouter plan or reducing your usage.
+</Warning>
