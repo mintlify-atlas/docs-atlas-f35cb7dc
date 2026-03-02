@@ -41,8 +41,8 @@ PolyChat-AI's multi-model chat feature allows you to run up to 3 different AI mo
   
   <Step title="Select Models">
     Choose 2-3 different models you want to compare. Popular combinations:
-    - GPT-5.2 + Claude 4.5 Sonnet + Gemini 3 Flash
-    - DeepSeek V3.2 + Minimax M2.5 + GPT-4o
+    - GPT-4o + Claude 3 Sonnet + Gemini 2.5 Pro
+    - GPT-4 Turbo + Claude 3.5 Sonnet + Gemini 2.5 Flash
   </Step>
   
   <Step title="Send Message">
@@ -61,24 +61,24 @@ PolyChat-AI's multi-model chat feature allows you to run up to 3 different AI mo
 ```typescript
 // Recommended: Compare specialized coding models
 const codingModels = [
-  'openai/gpt-4o',              // General purpose, strong at code
-  'anthropic/claude-4.5-sonnet', // Excellent reasoning
-  'google/gemini-3-flash-preview' // Fast, good at code
+  'openai/gpt-4o',                    // General purpose, strong at code
+  'anthropic/claude-3.5-sonnet',      // Excellent reasoning
+  'google/gemini-2.5-flash-preview'   // Fast, good at code
 ];
 ```
 
 **Why this combination?**
 - GPT-4o: Broad programming knowledge
-- Claude 4.5: Superior code reasoning and debugging
-- Gemini 3 Flash: Quick responses with 1M token context
+- Claude 3.5 Sonnet: Superior code reasoning and debugging
+- Gemini 2.5 Flash: Quick responses with large context
 
 ### For Creative Writing
 
 ```typescript
 const creativeModels = [
-  'anthropic/claude-4.5-sonnet',  // Nuanced, natural language
-  'openai/gpt-5.2',               // Creative and diverse
-  'google/gemini-3-flash-preview' // Fast iterations
+  'anthropic/claude-3.5-sonnet',    // Nuanced, natural language
+  'openai/gpt-4o',                  // Creative and diverse
+  'google/gemini-2.5-pro'           // Fast iterations
 ];
 ```
 
@@ -86,9 +86,9 @@ const creativeModels = [
 
 ```typescript
 const analysisModels = [
-  'anthropic/claude-4.5-sonnet',    // Deep reasoning
-  'deepseek/deepseek-v3.2-20251201', // Cost-effective, analytical
-  'openai/gpt-5.2'                   // Comprehensive analysis
+  'anthropic/claude-3-opus',        // Deep reasoning
+  'openai/gpt-4-turbo',             // Comprehensive analysis
+  'google/gemini-2.5-pro'           // Multi-modal analysis
 ];
 ```
 
@@ -99,15 +99,15 @@ const analysisModels = [
 Access to **100+ language models** via OpenRouter:
 
 <Tabs>
-  <Tab title="Top Trending (2026)">
-    From `src/services/openRouter.ts`, current trending models:
+  <Tab title="Popular Models">
+    From `src/services/openRouter.ts`, popular available models:
     
-    - **Minimax M2.5** - Top trending #1, newest model
-    - **Kimi K2.5** - Chinese AI, highly performant
-    - **Gemini 3 Flash** - 1M token context from Google
-    - **DeepSeek V3.2** - Excellent quality/price ratio
-    - **Claude 4.5 Sonnet** - Latest from Anthropic
-    - **GPT-5.2** - 400K context from OpenAI
+    - **GPT-4o** - Latest from OpenAI, multimodal
+    - **Claude 3.5 Sonnet** - Latest from Anthropic
+    - **Claude 3 Opus** - Most capable Claude model
+    - **Gemini 2.5 Pro** - Latest from Google
+    - **Gemini 2.5 Flash** - Fast responses
+    - **GPT-4 Turbo** - Previous generation OpenAI
   </Tab>
   
   <Tab title="Free Models">
@@ -301,5 +301,5 @@ const sendMessageToAll = async (message: string) => {
 - **Context windows**: Each model has its own context window limits
 
 <Card title="Next: Templates" icon="scroll" href="/features/templates">
-  Explore 16+ pre-built conversation templates across 7 categories
+  Explore 27 pre-built conversation templates across 7 categories
 </Card>
