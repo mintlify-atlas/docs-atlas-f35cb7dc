@@ -1,0 +1,106 @@
+{
+  "projectType": "saas",
+  "projectName": "PolyChat-AI",
+  "projectDescription": "Modern AI chat interface with multi-model support, image generation, and RAG capabilities via OpenRouter",
+  "theme": "palm",
+  "primaryColor": "#8b5cf6",
+  "lightColor": "#a78bfa",
+  "darkColor": "#7c3aed",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "installation"
+            ]
+          },
+          {
+            "group": "Core Features",
+            "pages": [
+              "features/chat-interface",
+              "features/multi-model-chat",
+              "features/templates",
+              "features/quick-actions",
+              "features/image-generation",
+              "features/rag-context"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/configuration",
+              "guides/customization",
+              "guides/keyboard-shortcuts"
+            ]
+          },
+          {
+            "group": "Advanced",
+            "pages": [
+              "advanced/usage-dashboard",
+              "advanced/api-integration",
+              "advanced/troubleshooting"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Services",
+            "pages": [
+              "api/services/openrouter",
+              "api/services/rag-service",
+              "api/services/models-api",
+              "api/services/local-storage"
+            ]
+          },
+          {
+            "group": "Hooks",
+            "pages": [
+              "api/hooks/use-chat",
+              "api/hooks/use-models",
+              "api/hooks/use-settings",
+              "api/hooks/use-usage-stats"
+            ]
+          },
+          {
+            "group": "Types",
+            "pages": [
+              "api/types/message",
+              "api/types/model",
+              "api/types/settings",
+              "api/types/templates"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Multi-model AI chat via OpenRouter (100+ models)",
+    "AI image generation with automatic retry",
+    "RAG context enhancement with local embeddings",
+    "16+ conversation templates across 7 categories",
+    "10+ quick actions for text/code transformation",
+    "Multi-model comparison (up to 3 simultaneous)",
+    "Usage statistics dashboard",
+    "Multiple themes and accent colors",
+    "Keyboard shortcuts for power users"
+  ],
+  "publicApiSurface": [
+    "fetchAIResponse(messages, apiKey, model, systemPrompt)",
+    "generateImage(prompt, apiKey, size, style, mood, lighting)",
+    "fetchModels(apiKey)",
+    "ragSearch(query, conversationHistory)",
+    "useChat() - Main chat hook",
+    "useModels() - Model management hook",
+    "useSettings() - Settings hook",
+    "useUsageStats() - Analytics hook"
+  ]
+}
